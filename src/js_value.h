@@ -30,8 +30,10 @@ class JsValue {
   JsValue(const v8::Handle<v8::Context>& context,
           const v8::Handle<v8::Value>& value);
 
-  JsValuePtr Call(const JsValueList& args = JsValueList(),
-                  JsValuePtr recv = JsValuePtr());
+  JsValuePtr Call(const JsValueList& args);
+
+  typedef std::vector<v8::Handle<v8::Value>> CallParam;
+  JsValuePtr Call(CallParam& args = CallParam());
 
   inline bool BooleanValue() const {
     return value_->BooleanValue();
