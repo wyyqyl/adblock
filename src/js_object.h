@@ -1,13 +1,46 @@
 #ifndef JS_OBJECT_H_
 #define JS_OBJECT_H_
 
-#include <v8.h>
+#include "env.h"
+#include <boost/thread/thread.hpp>
 
 namespace adblock {
 
-class Environment;
+class Thread {
+ public:
+  explicit Thread(v8::Isolate* isolate)
+      : env_(Environment::GetCurrent(isolate)) {
+  }
+  virtual ~Thread() {
+  }
+  void Start() {
+    thread_ = boost::thread(&Thread::Run, this);
+    thread_.detach();
+  }
+  virtual void Run() = 0;
+
+ protected:
+  Environment* env_;
+  boost::thread thread_;
+};
 
 namespace js_object {
+
+class TimeoutThread : public Thread {
+ public:
+  TimeoutThread(v8::Isolate* isolate,
+                int delay,
+                JsValuePtr func,
+                const JsValueList& args)
+      : Thread(isolate), delay_(delay), func_(func), args_(args) {
+  }
+  void Run();
+
+ private:
+  int delay_;
+  JsValuePtr func_;
+  JsValueList args_;
+};
 
 void Setup(Environment* env);
 

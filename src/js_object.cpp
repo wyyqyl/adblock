@@ -1,9 +1,6 @@
 #include "js_object.h"
-#include "env.h"
 #include "js_error.h"
 #include "utils.h"
-
-#include <boost/thread/thread.hpp>
 
 namespace adblock {
 namespace js_object {
@@ -53,9 +50,11 @@ inline JsValueList CONVERT_ARGUMENTS(
     return;                                                                   \
   } while (0)
 
-void SetTimeoutThreadFunc(JsValuePtr func, int delay, JsValueList args) {
-  boost::this_thread::sleep(boost::posix_time::milliseconds(delay));
-  func->Call(args);
+
+void TimeoutThread::Run() {
+  boost::this_thread::sleep(boost::posix_time::milliseconds(delay_));
+  func_->Call(args_);
+  delete this;
 }
 
 void SetTimeoutCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -71,8 +70,8 @@ void SetTimeoutCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   JsValuePtr func = JsValuePtr(new JsValue(isolate, args[0]));
   int delay = args[1]->Int32Value();
   JsValueList arguments = CONVERT_ARGUMENTS(args, 2);
-  boost::thread t(boost::bind(&SetTimeoutThreadFunc, func, delay, arguments));
-  t.detach();
+  Thread* thread = new TimeoutThread(isolate, delay, func, arguments);
+  thread->Start();
 }
 
 void TriggerCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -81,7 +80,6 @@ void TriggerCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ADB_THROW_EXCEPTION(isolate, "trigger expects at least one parameter");
   }
 
-  v8::HandleScope handle_scope(isolate);
   JsValueList arguments = CONVERT_ARGUMENTS(args, 1);
   Environment* env = Environment::GetCurrent(isolate);
   env->TriggerEvent(V8_STRING_TO_STD_STRING(args[0]->ToString()), arguments);
