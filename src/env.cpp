@@ -88,4 +88,18 @@ void Environment::Dispose() {
   delete this;
 }
 
+void Environment::SetFileSystem(FileSystemPtr file_system) {
+  if (!file_system) {
+    throw std::invalid_argument("FileSystem can't be null");
+  }
+  file_system_ = file_system;
+}
+
+FileSystemPtr Environment::GetFileSystem() {
+  if (!file_system_) {
+    file_system_.reset(new DefaultFileSystem());
+  }
+  return file_system_;
+}
+
 }  // namespace adblock

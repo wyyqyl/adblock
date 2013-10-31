@@ -2,6 +2,8 @@
 #include "js_error.h"
 #include "utils.h"
 
+#include <boost/filesystem/operations.hpp>
+
 namespace adblock {
 namespace js_object {
 
@@ -50,10 +52,15 @@ inline JsValueList CONVERT_ARGUMENTS(
     return;                                                                   \
   } while (0)
 
+#define SETUP_THREAD_CONTEXT(env)                                             \
+  v8::Isolate* isolate = env->isolate();                                      \
+  v8::Locker locker(isolate);                                                 \
+  v8::HandleScope handle_scope(isolate);                                      \
+  v8::Context::Scope context_scope(env->context())
 
 void TimeoutThread::Run() {
   boost::this_thread::sleep(boost::posix_time::milliseconds(delay_));
-  func_->Call(args_);
+  func_->Call(args_, env_);
   delete this;
 }
 
@@ -96,22 +103,219 @@ void Setup(Environment* env) {
 
 namespace file_system_object {
 
+void ReadThread::Run() {
+  std::string content;
+  std::string error;
+
+  try {
+    content = file_system_->Read(path_);
+  } catch(const std::exception& e) {
+    error = e.what();
+  } catch(...) {
+    error = "Unknown error occurred while reading from " + path_;
+  }
+
+  SETUP_THREAD_CONTEXT(env_);
+
+  v8::Local<v8::Object> result = v8::Object::New();
+  result->Set(STD_STRING_TO_V8_STRING(isolate, "content"),
+              STD_STRING_TO_V8_STRING(isolate, content));
+  result->Set(STD_STRING_TO_V8_STRING(isolate, "error"),
+              STD_STRING_TO_V8_STRING(isolate, error));
+  CallParams params;
+  params.push_back(result);
+  callback_->Call(params);
+  delete this;
+}
+
+void WriteThread::Run() {
+  std::string error;
+
+  try {
+    file_system_->Write(path_, data_);
+  } catch(const std::exception& e) {
+    error = e.what();
+  } catch(...) {
+    error = "Unknown error occurred while writing to " + path_;
+  }
+
+  SETUP_THREAD_CONTEXT(env_);
+
+  auto result = v8::String::NewFromUtf8(isolate, error.c_str());
+  CallParams params;
+  params.push_back(result);
+  callback_->Call(params);
+  delete this;
+}
+
+void RemoveThread::Run() {
+  std::string error;
+  bool removed = true;
+
+  try {
+    removed = file_system_->Remove(path_);
+  } catch(const boost::filesystem::filesystem_error& e) {
+    error = e.what();
+  } catch(...) {
+    error = "Unknown error occurred while removing " + path_;
+  }
+
+  if (!removed && error.length() == 0) {
+    error = "Unknown error occurred while removing " + path_;
+  }
+
+  SETUP_THREAD_CONTEXT(env_);
+
+  auto result = v8::String::NewFromUtf8(isolate, error.c_str());
+  CallParams params;
+  params.push_back(result);
+  callback_->Call(params);
+  delete this;
+}
+
+void MoveThread::Run() {
+  std::string error;
+
+  try {
+    file_system_->Move(from_, to_);
+  } catch(const boost::filesystem::filesystem_error& e) {
+    error = e.what();
+  } catch(...) {
+    error = "Unknown error occurred while moving " + from_ + " to " + to_;
+  }
+
+  SETUP_THREAD_CONTEXT(env_);
+
+  auto result = v8::String::NewFromUtf8(isolate, error.c_str());
+  CallParams params;
+  params.push_back(result);
+  callback_->Call(params);
+  delete this;
+}
+
+void StatThread::Run() {
+  std::string error;
+  FileSystem::StatResult stat_result;
+
+  try {
+    stat_result = file_system_->Stat(path_);
+  } catch(const boost::filesystem::filesystem_error& e) {
+    error = e.what();
+  } catch(...) {
+    error = "Unknown error occurred while stating " + path_;
+  }
+
+  SETUP_THREAD_CONTEXT(env_);
+
+  v8::Local<v8::Object> result = v8::Object::New();
+  result->Set(STD_STRING_TO_V8_STRING(isolate, "exists"),
+              v8::Boolean::New(stat_result.exists));
+  result->Set(STD_STRING_TO_V8_STRING(isolate, "isFile"),
+              v8::Boolean::New(stat_result.is_file));
+  result->Set(STD_STRING_TO_V8_STRING(isolate, "isDirectory"),
+              v8::Boolean::New(stat_result.is_directory));
+  result->Set(STD_STRING_TO_V8_STRING(isolate, "lastWriteTime"),
+      v8::Number::New(static_cast<double>(stat_result.last_write_time)));
+  result->Set(STD_STRING_TO_V8_STRING(isolate, "error"),
+              STD_STRING_TO_V8_STRING(isolate, error));
+  CallParams params;
+  params.push_back(result);
+  callback_->Call(params);
+  delete this;
+}
+
 void ReadCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  if (args.Length() != 2) {
+    ADB_THROW_EXCEPTION(isolate, "fileSystem.read requires 2 parameters");
+  }
+  if (!args[1]->IsFunction()) {
+    ADB_THROW_EXCEPTION(isolate,
+        "Second argument to fileSystem.read must be a function");
+  }
+
+  std::string path = V8_STRING_TO_STD_STRING(args[0]->ToString());
+  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[1]));
+  Thread* thread = new ReadThread(isolate, path, callback);
+  thread->Start();
 }
 
 void WriteCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  if (args.Length() != 3) {
+    ADB_THROW_EXCEPTION(isolate, "fileSystem.write requires 3 parameters");
+  }
+  if (!args[2]->IsFunction()) {
+    ADB_THROW_EXCEPTION(isolate,
+        "Third argument to fileSystem.write must be a function");
+  }
+
+  std::string path = V8_STRING_TO_STD_STRING(args[0]->ToString());
+  std::string data = V8_STRING_TO_STD_STRING(args[1]->ToString());
+  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[2]));
+  Thread* thread = new WriteThread(isolate, path, data, callback);
+  thread->Start();
 }
 
 void RemoveCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  if (args.Length() != 2) {
+    ADB_THROW_EXCEPTION(isolate, "fileSystem.remove requires 2 parameters");
+  }
+  if (!args[1]->IsFunction()) {
+    ADB_THROW_EXCEPTION(isolate,
+        "Second argument to fileSystem.remove must be a function");
+  }
+
+  std::string path = V8_STRING_TO_STD_STRING(args[0]->ToString());
+  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[1]));
+  Thread* thread = new RemoveThread(isolate, path, callback);
+  thread->Start();
 }
 
 void MoveCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  if (args.Length() != 3) {
+    ADB_THROW_EXCEPTION(isolate, "fileSystem.move requires 3 parameters");
+  }
+  if (!args[2]->IsFunction()) {
+    ADB_THROW_EXCEPTION(isolate,
+                        "Third argument to fileSystem.move must be a function");
+  }
+
+  std::string from = V8_STRING_TO_STD_STRING(args[0]->ToString());
+  std::string to = V8_STRING_TO_STD_STRING(args[1]->ToString());
+  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[2]));
+  Thread* thread = new MoveThread(isolate, from, to, callback);
+  thread->Start();
 }
 
 void StatCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  if (args.Length() != 2) {
+    ADB_THROW_EXCEPTION(isolate, "fileSystem.stat requires 2 parameters");
+  }
+  if (!args[1]->IsFunction()) {
+    ADB_THROW_EXCEPTION(isolate,
+        "Second argument to fileSystem.stat must be a function");
+  }
+
+  std::string path = V8_STRING_TO_STD_STRING(args[0]->ToString());
+  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[1]));
+  Thread* thread = new StatThread(isolate, path, callback);
+  thread->Start();
 }
 
 void ResolveCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  if (args.Length() != 1) {
+    ADB_THROW_EXCEPTION(isolate, "fileSystem.resolve requires 1 parameters");
+  }
+
+  std::string path = V8_STRING_TO_STD_STRING(args[0]->ToString());
+  FileSystemPtr file_system = Environment::GetCurrent(isolate)->GetFileSystem();
+  std::string result = file_system->Resolve(path);
+  args.GetReturnValue().Set(STD_STRING_TO_V8_STRING(isolate, result));
 }
 
 v8::Local<v8::Object> Setup(Environment* env) {

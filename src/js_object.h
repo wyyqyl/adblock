@@ -45,6 +45,84 @@ class TimeoutThread : public Thread {
 void Setup(Environment* env);
 
 namespace file_system_object {
+
+class IoThread : public Thread {
+ public:
+  IoThread(v8::Isolate* isolate, JsValuePtr callback)
+      : Thread(isolate), callback_(callback) {
+    file_system_ = env_->GetFileSystem();
+  }
+
+ protected:
+  FileSystemPtr file_system_;
+  JsValuePtr callback_;
+};
+
+class ReadThread : public IoThread {
+ public:
+  ReadThread(v8::Isolate* isolate, const std::string& path, JsValuePtr callback)
+      : IoThread(isolate, callback), path_(path) {
+  }
+  void Run();
+
+ private:
+  std::string path_;
+};
+
+class WriteThread : public IoThread {
+ public:
+  WriteThread(v8::Isolate* isolate,
+              const std::string& path,
+              const std::string& data,
+              JsValuePtr callback)
+      : IoThread(isolate, callback), path_(path), data_(data) {
+  }
+  void Run();
+
+ private:
+  std::string path_;
+  std::string data_;
+};
+
+class RemoveThread : public IoThread {
+ public:
+  RemoveThread(v8::Isolate* isolate,
+               const std::string& path,
+               JsValuePtr callback)
+      : IoThread(isolate, callback), path_(path) {
+  }
+  void Run();
+
+ private:
+  std::string path_;
+};
+
+class MoveThread : public IoThread {
+ public:
+  MoveThread(v8::Isolate* isolate,
+             const std::string& from,
+             const std::string& to,
+             JsValuePtr callback)
+      : IoThread(isolate, callback), from_(from), to_(to) {
+  }
+  void Run();
+
+ private:
+  std::string from_;
+  std::string to_;
+};
+
+class StatThread : public IoThread {
+ public:
+  StatThread(v8::Isolate* isolate, const std::string& path, JsValuePtr callback)
+      : IoThread(isolate, callback), path_(path) {
+  }
+  void Run();
+
+ private:
+  std::string path_;
+};
+
 v8::Local<v8::Object> Setup(Environment* env);
 }  // namespace file_system_object
 

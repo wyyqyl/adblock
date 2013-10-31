@@ -14,6 +14,7 @@
     <ClCompile Include="..\src\adblock_impl.cpp" />
     <ClCompile Include="..\src\env.cpp" />
     <ClCompile Include="$(IntDir)adblock.js.cpp" />
+    <ClCompile Include="..\src\file_system.cpp" />
     <ClCompile Include="..\src\js_error.cpp" />
     <ClCompile Include="..\src\js_object.cpp" />
     <ClCompile Include="..\src\js_value.cpp" />
@@ -22,6 +23,7 @@
     <ClInclude Include="..\src\adblock.h" />
     <ClInclude Include="..\src\adblock_impl.h" />
     <ClInclude Include="..\src\env.h" />
+    <ClInclude Include="..\src\file_system.h" />
     <ClInclude Include="..\src\js_data.h" />
     <ClInclude Include="..\src\js_error.h" />
     <ClInclude Include="..\src\js_object.h" />
@@ -80,7 +82,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
