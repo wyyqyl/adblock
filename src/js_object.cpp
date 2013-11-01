@@ -1,6 +1,5 @@
 #include "js_object.h"
 #include "js_error.h"
-#include "utils.h"
 
 #include <boost/filesystem/operations.hpp>
 
@@ -27,24 +26,6 @@ inline void ADB_SET_OBJECT(const T& recv,
   recv->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name), obj);
 }
 #define ADB_SET_OBJECT adblock::js_object::ADB_SET_OBJECT
-
-inline JsValueList CONVERT_ARGUMENTS(
-    const v8::FunctionCallbackInfo<v8::Value>& args,
-    int start = 0,
-    int end = -1) {
-  JsValueList arguments;
-  if (start >= args.Length()) {
-    return arguments;
-  }
-  if (end == -1 || end > args.Length()) {
-    end = args.Length();
-  }
-  for (int idx = start; idx < end; ++idx) {
-    arguments.push_back(JsValuePtr(new JsValue(args.GetIsolate(), args[idx])));
-  }
-  return arguments;
-}
-#define CONVERT_ARGUMENTS adblock::js_object::CONVERT_ARGUMENTS
 
 #define ADB_THROW_EXCEPTION(isolate, str)                                     \
   do {                                                                        \
@@ -74,10 +55,7 @@ void SetTimeoutCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
                         "First argument to setTimeout must be a function!");
   }
 
-  JsValuePtr func = JsValuePtr(new JsValue(isolate, args[0]));
-  int delay = args[1]->Int32Value();
-  JsValueList arguments = CONVERT_ARGUMENTS(args, 2);
-  Thread* thread = new TimeoutThread(isolate, delay, func, arguments);
+  Thread* thread = new TimeoutThread(args);
   thread->Start();
 }
 
@@ -122,9 +100,11 @@ void ReadThread::Run() {
               STD_STRING_TO_V8_STRING(isolate, content));
   result->Set(STD_STRING_TO_V8_STRING(isolate, "error"),
               STD_STRING_TO_V8_STRING(isolate, error));
+
   CallParams params;
   params.push_back(result);
   callback_->Call(params);
+
   delete this;
 }
 
@@ -145,6 +125,7 @@ void WriteThread::Run() {
   CallParams params;
   params.push_back(result);
   callback_->Call(params);
+
   delete this;
 }
 
@@ -170,6 +151,7 @@ void RemoveThread::Run() {
   CallParams params;
   params.push_back(result);
   callback_->Call(params);
+
   delete this;
 }
 
@@ -190,6 +172,7 @@ void MoveThread::Run() {
   CallParams params;
   params.push_back(result);
   callback_->Call(params);
+
   delete this;
 }
 
@@ -218,9 +201,11 @@ void StatThread::Run() {
       v8::Number::New(static_cast<double>(stat_result.last_write_time)));
   result->Set(STD_STRING_TO_V8_STRING(isolate, "error"),
               STD_STRING_TO_V8_STRING(isolate, error));
+
   CallParams params;
   params.push_back(result);
   callback_->Call(params);
+
   delete this;
 }
 
@@ -234,9 +219,7 @@ void ReadCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
         "Second argument to fileSystem.read must be a function");
   }
 
-  std::string path = V8_STRING_TO_STD_STRING(args[0]->ToString());
-  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[1]));
-  Thread* thread = new ReadThread(isolate, path, callback);
+  Thread* thread = new ReadThread(args);
   thread->Start();
 }
 
@@ -250,10 +233,7 @@ void WriteCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
         "Third argument to fileSystem.write must be a function");
   }
 
-  std::string path = V8_STRING_TO_STD_STRING(args[0]->ToString());
-  std::string data = V8_STRING_TO_STD_STRING(args[1]->ToString());
-  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[2]));
-  Thread* thread = new WriteThread(isolate, path, data, callback);
+  Thread* thread = new WriteThread(args);
   thread->Start();
 }
 
@@ -267,9 +247,7 @@ void RemoveCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
         "Second argument to fileSystem.remove must be a function");
   }
 
-  std::string path = V8_STRING_TO_STD_STRING(args[0]->ToString());
-  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[1]));
-  Thread* thread = new RemoveThread(isolate, path, callback);
+  Thread* thread = new RemoveThread(args);
   thread->Start();
 }
 
@@ -283,10 +261,7 @@ void MoveCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
                         "Third argument to fileSystem.move must be a function");
   }
 
-  std::string from = V8_STRING_TO_STD_STRING(args[0]->ToString());
-  std::string to = V8_STRING_TO_STD_STRING(args[1]->ToString());
-  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[2]));
-  Thread* thread = new MoveThread(isolate, from, to, callback);
+  Thread* thread = new MoveThread(args);
   thread->Start();
 }
 
@@ -300,9 +275,7 @@ void StatCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
         "Second argument to fileSystem.stat must be a function");
   }
 
-  std::string path = V8_STRING_TO_STD_STRING(args[0]->ToString());
-  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[1]));
-  Thread* thread = new StatThread(isolate, path, callback);
+  Thread* thread = new StatThread(args);
   thread->Start();
 }
 
@@ -358,6 +331,7 @@ void WebRequestThread::Run() {
   CallParams params;
   params.push_back(result);
   callback_->Call(params);
+
   delete this;
 }
 
@@ -375,19 +349,7 @@ void GetCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
                         "Third argument to webRequest.get must be a function");
   }
 
-  std::string url = V8_STRING_TO_STD_STRING(args[0]->ToString());
-  WebRequest::HeaderList headers;
-  v8::Handle<v8::Object> obj = v8::Handle<v8::Object>::Cast<v8::Value>(args[1]);
-  v8::Local<v8::Array> properties = obj->GetOwnPropertyNames();
-  for (uint32_t idx = 0; idx < properties->Length(); ++idx) {
-    v8::Local<v8::Value> property = properties->Get(idx);
-    v8::Local<v8::Value> value = obj->Get(property);
-    std::string property_name = V8_STRING_TO_STD_STRING(property->ToString());
-    std::string value_name = V8_STRING_TO_STD_STRING(value->ToString());
-    headers.push_back(std::make_pair(property_name, value_name));
-  }
-  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[2]));
-  Thread* thread = new WebRequestThread(isolate, url, headers, callback);
+  Thread* thread = new WebRequestThread(args);
   thread->Start();
 }
 
