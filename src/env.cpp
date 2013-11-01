@@ -116,4 +116,18 @@ adblock::LogSystemPtr Environment::GetLogSystem() {
   return log_system_;
 }
 
+void Environment::SetWebRequest(WebRequestPtr web_reqeust) {
+  if (!web_reqeust) {
+    throw std::invalid_argument("WebRequest can't be null");
+  }
+  web_request_ = web_reqeust;
+}
+
+adblock::WebRequestPtr Environment::GetWebRequest() {
+  if (!web_request_) {
+    web_request_.reset(new DefaultWebRequest());
+  }
+  return web_request_;
+}
+
 }  // namespace adblock

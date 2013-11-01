@@ -334,7 +334,61 @@ v8::Local<v8::Object> Setup(Environment* env) {
 
 namespace web_request_object {
 
+void WebRequestThread::Run() {
+  WebRequest::ServerResponse response = web_request_->Get(url_, headers_);
+
+  SETUP_THREAD_CONTEXT(env_);
+
+  v8::Local<v8::Object> result = v8::Object::New();
+  result->Set(STD_STRING_TO_V8_STRING(isolate, "status"),
+              v8::Integer::New(response.status));
+  result->Set(STD_STRING_TO_V8_STRING(isolate, "responseStatus"),
+              v8::Integer::New(response.response_status));
+  result->Set(STD_STRING_TO_V8_STRING(isolate, "responseText"),
+              STD_STRING_TO_V8_STRING(isolate, response.response_text));
+
+  v8::Local<v8::Object> headers_obj = v8::Object::New();
+  for (auto it = response.response_headers.begin();
+       it != response.response_headers.end(); ++it) {
+    headers_obj->Set(STD_STRING_TO_V8_STRING(isolate, it->first),
+                     STD_STRING_TO_V8_STRING(isolate, it->second));
+  }
+  result->Set(STD_STRING_TO_V8_STRING(isolate, "responseHeaders"), headers_obj);
+
+  CallParams params;
+  params.push_back(result);
+  callback_->Call(params);
+  delete this;
+}
+
 void GetCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  if (args.Length() != 3) {
+    ADB_THROW_EXCEPTION(isolate, "webRequest.get requires 3 parameters");
+  }
+  if (!args[1]->IsObject()) {
+    ADB_THROW_EXCEPTION(isolate,
+                        "Second argument to webRequest.get must be a object");
+  }
+  if (!args[2]->IsFunction()) {
+    ADB_THROW_EXCEPTION(isolate,
+                        "Third argument to webRequest.get must be a function");
+  }
+
+  std::string url = V8_STRING_TO_STD_STRING(args[0]->ToString());
+  WebRequest::HeaderList headers;
+  v8::Handle<v8::Object> obj = v8::Handle<v8::Object>::Cast<v8::Value>(args[1]);
+  v8::Local<v8::Array> properties = obj->GetOwnPropertyNames();
+  for (uint32_t idx = 0; idx < properties->Length(); ++idx) {
+    v8::Local<v8::Value> property = properties->Get(idx);
+    v8::Local<v8::Value> value = obj->Get(property);
+    std::string property_name = V8_STRING_TO_STD_STRING(property->ToString());
+    std::string value_name = V8_STRING_TO_STD_STRING(value->ToString());
+    headers.push_back(std::make_pair(property_name, value_name));
+  }
+  JsValuePtr callback = JsValuePtr(new JsValue(isolate, args[2]));
+  Thread* thread = new WebRequestThread(isolate, url, headers, callback);
+  thread->Start();
 }
 
 v8::Local<v8::Object> Setup(Environment* env) {

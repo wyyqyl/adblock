@@ -4,6 +4,7 @@
 #include "js_value.h"
 #include "file_system.h"
 #include "log_system.h"
+#include "web_request.h"
 
 #include <boost/unordered/unordered_map.hpp>
 #include <boost/function.hpp>
@@ -46,6 +47,9 @@ class Environment {
   void SetLogSystem(LogSystemPtr log_system);
   LogSystemPtr GetLogSystem();
 
+  void SetWebRequest(WebRequestPtr web_reqeust);
+  WebRequestPtr GetWebRequest();
+
  private:
   explicit Environment(const v8::Local<v8::Context>& context);
   ~Environment();
@@ -59,6 +63,7 @@ class Environment {
   EventMap event_map_;
   FileSystemPtr file_system_;
   LogSystemPtr log_system_;
+  WebRequestPtr web_request_;
 };
 
 }  // namespace adblock

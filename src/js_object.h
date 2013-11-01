@@ -127,6 +127,25 @@ v8::Local<v8::Object> Setup(Environment* env);
 }  // namespace file_system_object
 
 namespace web_request_object {
+
+class WebRequestThread : public Thread {
+ public:
+  WebRequestThread(v8::Isolate* isolate,
+                   const std::string& url,
+                   const WebRequest::HeaderList& headers,
+                   JsValuePtr callback)
+      : Thread(isolate), url_(url), headers_(headers), callback_(callback) {
+    web_request_ = env_->GetWebRequest();
+  }
+  void Run();
+
+ private:
+  WebRequestPtr web_request_;
+  std::string url_;
+  WebRequest::HeaderList headers_;
+  JsValuePtr callback_;
+};
+
 v8::Local<v8::Object> Setup(Environment* env);
 }  // namespace web_request_object
 
