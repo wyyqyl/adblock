@@ -3,6 +3,7 @@
 
 #include "js_value.h"
 #include "file_system.h"
+#include "log_system.h"
 
 #include <boost/unordered/unordered_map.hpp>
 #include <boost/function.hpp>
@@ -42,6 +43,9 @@ class Environment {
   void SetFileSystem(FileSystemPtr file_system);
   FileSystemPtr GetFileSystem();
 
+  void SetLogSystem(LogSystemPtr log_system);
+  LogSystemPtr GetLogSystem();
+
  private:
   explicit Environment(const v8::Local<v8::Context>& context);
   ~Environment();
@@ -54,6 +58,7 @@ class Environment {
   JsData<v8::Context> context_;
   EventMap event_map_;
   FileSystemPtr file_system_;
+  LogSystemPtr log_system_;
 };
 
 }  // namespace adblock

@@ -102,4 +102,18 @@ FileSystemPtr Environment::GetFileSystem() {
   return file_system_;
 }
 
+void Environment::SetLogSystem(LogSystemPtr log_system) {
+  if (!log_system) {
+    throw std::invalid_argument("LogSystem can't be null");
+  }
+  log_system_ = log_system;
+}
+
+adblock::LogSystemPtr Environment::GetLogSystem() {
+  if (!log_system_) {
+    log_system_.reset(new DefaultLogSystem());
+  }
+  return log_system_;
+}
+
 }  // namespace adblock

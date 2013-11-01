@@ -348,19 +348,61 @@ v8::Local<v8::Object> Setup(Environment* env) {
 
 namespace console_object {
 
+void DoLog(LogSystem::LogLevel level,
+           const v8::FunctionCallbackInfo<v8::Value>& args) {
+  std::stringstream message;
+  for (int idx = 0; idx < args.Length(); ++idx) {
+    if (idx > 0) {
+      message << " ";
+    }
+    message << V8_STRING_TO_STD_STRING(args[idx]->ToString());
+  }
+
+  std::stringstream source;
+  source << "[";
+  auto frame = v8::StackTrace::CurrentStackTrace(1)->GetFrame(0);
+  source << V8_STRING_TO_STD_STRING(frame->GetScriptName());
+  source << ":" << frame->GetLineNumber() << "]";
+
+  auto callback = Environment::GetCurrent(args.GetIsolate())->GetLogSystem();
+  (*callback)(level, message.str(), source.str());
+}
+
 void LogCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  DoLog(LogSystem::LOG_LEVEL_LOG, args);
 }
 
 void InfoCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  DoLog(LogSystem::LOG_LEVEL_INFO, args);
 }
 
 void WarnCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  DoLog(LogSystem::LOG_LEVEL_WARN, args);
 }
 
 void ErrorCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  DoLog(LogSystem::LOG_LEVEL_ERROR, args);
 }
 
 void TraceCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  std::stringstream traceback;
+  auto frames = v8::StackTrace::CurrentStackTrace(100);
+  for (auto idx = 0, limit = frames->GetFrameCount(); idx < limit; ++idx) {
+    auto frame = frames->GetFrame(idx);
+    traceback << (idx + 1) << ": ";
+    std::string name = V8_STRING_TO_STD_STRING(frame->GetFunctionName());
+    if (name.size()) {
+      traceback << name;
+    } else {
+      traceback << "/* anonymous */";
+    }
+    traceback << "() at ";
+    traceback << V8_STRING_TO_STD_STRING(frame->GetScriptName());
+    traceback << ":" << frame->GetLineNumber() << std::endl;
+  }
+
+  auto callback = Environment::GetCurrent(args.GetIsolate())->GetLogSystem();
+  (*callback)(LogSystem::LOG_LEVEL_TRACE, traceback.str(), "");
 }
 
 v8::Local<v8::Object> Setup(Environment* env) {

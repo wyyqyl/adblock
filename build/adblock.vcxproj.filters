@@ -45,6 +45,9 @@
     <ClInclude Include="..\src\file_system.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\log_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\adblock_impl.cpp">
@@ -66,6 +69,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\file_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\log_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
