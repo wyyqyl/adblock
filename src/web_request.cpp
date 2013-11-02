@@ -109,7 +109,7 @@ WebRequest::ServerResponse DefaultWebRequest::Get(
   result.status = NS_ERROR_NOT_INITIALIZED;
   result.response_status = 0;
 
-  CURL *curl = curl_easy_init();
+  CURL* curl = curl_easy_init();
   if (!curl) {
     return result;
   }
@@ -123,7 +123,7 @@ WebRequest::ServerResponse DefaultWebRequest::Get(
   curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, ReceiveHeader);
   curl_easy_setopt(curl, CURLOPT_HEADERDATA, &header_data);
 
-  struct curl_slist* header_list = 0;
+  struct curl_slist* header_list = nullptr;
   for (auto it = headers.begin(); it != headers.end(); ++it) {
     header_list = curl_slist_append(header_list,
                                     (it->first + ": " + it->second).c_str());

@@ -11,14 +11,14 @@ class Thread {
  public:
   Thread() : env_(Environment::GetCurrent(v8::Isolate::GetCurrent())) {}
   virtual ~Thread() {}
+
   void Start() {
-    thread_ = boost::thread(&Thread::Run, this);
-    thread_.detach();
+    boost::thread t = boost::thread(&Thread::Run, this);
+    t.detach();
   }
 
  protected:
   Environment* env_;
-  boost::thread thread_;
 
  private:
   virtual void Run() = 0;

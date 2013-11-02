@@ -22,8 +22,7 @@ class FileSystem {
     std::time_t last_write_time;
   };
 
-  virtual ~FileSystem() {
-  }
+  virtual ~FileSystem() {}
   virtual std::string Read(const std::string& path) const = 0;
   virtual void Write(const std::string& path, const std::string& data) = 0;
   virtual bool Remove(const std::string& path) = 0;

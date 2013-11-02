@@ -41,7 +41,7 @@ Environment* Environment::GetCurrent(v8::Isolate* isolate) {
 
 Environment* Environment::GetCurrent(const v8::Local<v8::Context>& context) {
   return static_cast<Environment*>(
-    context->GetAlignedPointerFromEmbedderData(kContextEmbedderDataIndex));
+      context->GetAlignedPointerFromEmbedderData(kContextEmbedderDataIndex));
 }
 
 void Environment::SetEventCallback(const std::string& name,
