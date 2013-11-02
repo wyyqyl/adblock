@@ -32,8 +32,10 @@
 # library.
 
 import os, re, sys, string
-import jsmin
-
+try:
+  from slimit import minify
+except ImportError:
+  print 'You have to install slimit from https://pypi.python.org/pypi/slimit'
 
 def ToCAsciiArray(lines):
   result = []
@@ -208,66 +210,17 @@ HEADER_TEMPLATE = """\
 // want to make changes to this file you should either change the
 // javascript source files or `js2c.py` script.
 
-#include <std::string>
+#include <string>
 
 namespace adblock {
-namespace js2c {
 
-  static const byte sources[] = { %(sources_data)s };
+static const char sources[] = { %(sources_data)s };
+std::string js_sources[] = { %(source_lines)sstd::string() };
 
-%(raw_sources_declaration)s\
-
-  int GetBuiltinsCount() {
-    return %(builtin_count)i;
-  }
-
-  int GetIndex(const char* name) {
-%(get_index_cases)s\
-    return -1;
-  }
-
-  int GetRawScriptsSize() {
-    return %(raw_total_length)i;
-  }
-
-  
-  std::string GetRawScriptSource(int index) {
-%(get_raw_script_source_cases)s\
-    return std::string();
-  }
-
-  std::string GetScriptName(int index) {
-%(get_script_name_cases)s\
-    return std::string();
-  }
-
-  std::string GetScriptsSource() {
-    return std::string(raw_sources, %(total_length)i);
-  }
-
-}  // namespace js2c
 }  // namespace adblock
 """
 
-
-RAW_SOURCES_DECLARATION = """\
-  static const char* raw_sources = reinterpret_cast<const char*>(sources);
-"""
-
-
-GET_INDEX_CASE = """\
-    if (strcmp(name, "%(id)s") == 0) return %(i)i;
-"""
-
-
-GET_RAW_SCRIPT_SOURCE_CASE = """\
-    if (index == %(i)i) return std::string(raw_sources + %(offset)i, %(raw_length)i);
-"""
-
-
-GET_SCRIPT_NAME_CASE = """\
-    if (index == %(i)i) return std::string("%(name)s", %(length)i);
-"""
+SOURCE_DECLARATION = 'std::string("%(name)s"), std::string(sources + %(offset)i, %(raw_length)i), '
 
 def JS2C(source, target):
   ids = []
@@ -281,8 +234,6 @@ def JS2C(source, target):
     else:
       modules.append(s)
 
-  minifier = jsmin.JavaScriptMinifier()
-
   module_offset = 0
   all_sources = []
   for module in modules:
@@ -291,49 +242,31 @@ def JS2C(source, target):
     lines = ExpandConstants(lines, consts)
     lines = ExpandMacros(lines, macros)
     Validate(lines, filename)
-    lines = minifier.JSMinify(lines)
-    id = (os.path.split(filename)[1])[:-3]
+    lines = minify(lines, mangle=True, mangle_toplevel=True)
+    id = os.path.split(filename)[1]
     raw_length = len(lines)
     ids.append((id, raw_length, module_offset))
     all_sources.append(lines)
     module_offset += raw_length
-  total_length = raw_total_length = module_offset
 
-  raw_sources_declaration = RAW_SOURCES_DECLARATION
   sources_data = ToCAsciiArray("".join(all_sources))
 
-  # Build debugger support functions
-  get_index_cases = [ ]
-  get_raw_script_source_cases = [ ]
-  get_script_name_cases = [ ]
+  # Build source code lines
+  source_lines = [ ]
 
   i = 0
   for (id, raw_length, module_offset) in ids:
-    native_name = "%s.js" % id
-    get_index_cases.append(GET_INDEX_CASE % { 'id': id, 'i': i })
-    get_raw_script_source_cases.append(GET_RAW_SCRIPT_SOURCE_CASE % {
-        'offset': module_offset,
-        'raw_length': raw_length,
-        'i': i
-        })
-    get_script_name_cases.append(GET_SCRIPT_NAME_CASE % {
-        'name': native_name,
-        'length': len(native_name),
-        'i': i
-        })
-    i = i + 1
+    source_lines.append(SOURCE_DECLARATION % {
+      'name': id,
+      'offset': module_offset,
+      'raw_length': raw_length,
+      })
 
   # Emit result
   output = open(str(target[0]), "w")
   output.write(HEADER_TEMPLATE % {
-    'builtin_count': len(ids),
     'sources_data': sources_data,
-    'raw_sources_declaration': raw_sources_declaration,
-    'raw_total_length': raw_total_length,
-    'total_length': total_length,
-    'get_index_cases': "".join(get_index_cases),
-    'get_raw_script_source_cases': "".join(get_raw_script_source_cases),
-    'get_script_name_cases': "".join(get_script_name_cases)
+    'source_lines': "".join(source_lines)
   })
   output.close()
 

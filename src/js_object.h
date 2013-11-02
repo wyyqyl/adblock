@@ -46,7 +46,7 @@ inline JsValueList CONVERT_ARGUMENTS(
 
 class TimeoutThread : public Thread {
  public:
-  TimeoutThread(const v8::FunctionCallbackInfo<v8::Value>& args)
+  explicit TimeoutThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : delay_(args[1]->Int32Value()),
         func_(new JsValue(env_->isolate(), args[0])),
         args_(CONVERT_ARGUMENTS(args, 2)) {
@@ -75,7 +75,7 @@ class IoThread : public Thread {
 
 class ReadThread : public IoThread {
  public:
-  ReadThread(const v8::FunctionCallbackInfo<v8::Value>& args)
+  explicit ReadThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
     callback_ = JsValuePtr(new JsValue(env_->isolate(), args[1]));
   }
@@ -88,7 +88,7 @@ class ReadThread : public IoThread {
 
 class WriteThread : public IoThread {
  public:
-  WriteThread(const v8::FunctionCallbackInfo<v8::Value>& args)
+  explicit WriteThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : path_(V8_STRING_TO_STD_STRING(args[0]->ToString())),
         data_(V8_STRING_TO_STD_STRING(args[1]->ToString())) {
     callback_ = JsValuePtr(new JsValue(env_->isolate(), args[2]));
@@ -103,7 +103,7 @@ class WriteThread : public IoThread {
 
 class RemoveThread : public IoThread {
  public:
-  RemoveThread(const v8::FunctionCallbackInfo<v8::Value>& args)
+  explicit RemoveThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
     callback_ = JsValuePtr(new JsValue(env_->isolate(), args[1]));
   }
@@ -116,7 +116,7 @@ class RemoveThread : public IoThread {
 
 class MoveThread : public IoThread {
  public:
-  MoveThread(const v8::FunctionCallbackInfo<v8::Value>& args)
+  explicit MoveThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : from_(V8_STRING_TO_STD_STRING(args[0]->ToString())),
         to_(V8_STRING_TO_STD_STRING(args[1]->ToString())) {
     callback_ = JsValuePtr(new JsValue(env_->isolate(), args[2]));
@@ -131,7 +131,7 @@ class MoveThread : public IoThread {
 
 class StatThread : public IoThread {
  public:
-  StatThread(const v8::FunctionCallbackInfo<v8::Value>& args)
+  explicit StatThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
     callback_ = JsValuePtr(new JsValue(env_->isolate(), args[1]));
   }
@@ -149,7 +149,7 @@ namespace web_request_object {
 
 class WebRequestThread : public Thread {
  public:
-  WebRequestThread(const v8::FunctionCallbackInfo<v8::Value>& args)
+  explicit WebRequestThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : web_request_(env_->GetWebRequest()),
         url_(V8_STRING_TO_STD_STRING(args[0]->ToString())),
         callback_(new JsValue(env_->isolate(), args[2])) {
