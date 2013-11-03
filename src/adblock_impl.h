@@ -13,6 +13,8 @@ class AdBlockImpl : public AdBlock {
   AdBlockImpl();
   ~AdBlockImpl();
 
+  bool Init();
+
  private:
   Environment* env_;
   bool is_first_run_;

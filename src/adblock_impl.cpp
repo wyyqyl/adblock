@@ -9,25 +9,14 @@ namespace adblock {
 extern std::string js_sources[];
 
 void CreateInstance(AdBlockPtr *adblock) {
-  *adblock = AdBlockPtr(new AdBlockImpl());
+  *adblock = nullptr;
+  AdBlockImpl *result = new AdBlockImpl();
+  if (result->Init()) {
+    *adblock = AdBlockPtr(result);
+  }
 }
 
 AdBlockImpl::AdBlockImpl() : is_first_run_(false) {
-  v8::Isolate* isolate = v8::Isolate::GetCurrent();
-  v8::Locker locker(isolate);
-  v8::HandleScope handle_scope(isolate);
-  v8::Local<v8::Context> context = v8::Context::New(isolate);
-  v8::Context::Scope context_scope(context);
-
-  env_ = Environment::New(context);
-  js_object::Setup(env_);
-
-  env_->SetEventCallback("init", boost::bind(&AdBlockImpl::InitDone, this, _1));
-  for (int idx = 0; !js_sources[idx].empty(); idx += 2) {
-    env_->Evaluate(js_sources[idx + 1], js_sources[idx]);
-  }
-
-  // Wait for signal from AdBlockImpl::InitDone()
 }
 
 AdBlockImpl::~AdBlockImpl() {
@@ -37,6 +26,31 @@ AdBlockImpl::~AdBlockImpl() {
     env_->Dispose();
     env_ = nullptr;
   }
+}
+
+bool AdBlockImpl::Init() {
+  v8::Isolate* isolate = v8::Isolate::GetCurrent();
+  v8::Locker locker(isolate);
+  v8::HandleScope handle_scope(isolate);
+  v8::Local<v8::Context> context = v8::Context::New(isolate);
+  v8::Context::Scope context_scope(context);
+
+  try {
+    env_ = Environment::New(context);
+    js_object::Setup(env_);
+
+    env_->SetEventCallback("init",
+                           boost::bind(&AdBlockImpl::InitDone, this, _1));
+    for (int idx = 0; !js_sources[idx].empty(); idx += 2) {
+      env_->Evaluate(js_sources[idx + 1], js_sources[idx]);
+    }
+
+    // Wait for signal from AdBlockImpl::InitDone()
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << std::endl;
+    return false;
+  }
+  return true;
 }
 
 void AdBlockImpl::InitDone(const JsValueList& args) {
