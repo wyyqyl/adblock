@@ -44,8 +44,6 @@ bool AdBlockImpl::Init() {
     for (int idx = 0; !js_sources[idx].empty(); idx += 2) {
       env_->Evaluate(js_sources[idx + 1], js_sources[idx]);
     }
-
-    // Wait for signal from AdBlockImpl::InitDone()
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
     return false;
@@ -56,7 +54,6 @@ bool AdBlockImpl::Init() {
 void AdBlockImpl::InitDone(const JsValueList& args) {
   env_->RemoveEventCallback("init");
   is_first_run_ = args.size() && args.front()->BooleanValue();
-  // Emit signal
 }
 
 }  // namespace adblock
