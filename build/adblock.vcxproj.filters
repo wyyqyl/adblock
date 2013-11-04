@@ -93,5 +93,14 @@
     <None Include="..\lib\api.js">
       <Filter>Resource Files\lib</Filter>
     </None>
+    <None Include="..\lib\compat.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
+    <None Include="..\lib\filterClasses.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
+    <None Include="..\lib\matcher.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
   </ItemGroup>
 </Project>
