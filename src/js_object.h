@@ -9,7 +9,7 @@ namespace adblock {
 
 class Thread {
  public:
-  Thread() : env_(Environment::GetCurrent(v8::Isolate::GetCurrent())) {}
+  Thread(v8::Isolate* isolate) : env_(Environment::GetCurrent(isolate)) {}
   virtual ~Thread() {}
 
   void Start() {
@@ -47,8 +47,9 @@ inline JsValueList CONVERT_ARGUMENTS(
 class TimeoutThread : public Thread {
  public:
   explicit TimeoutThread(const v8::FunctionCallbackInfo<v8::Value>& args)
-      : delay_(args[1]->Int32Value()),
-        func_(new JsValue(env_->isolate(), args[0])),
+      : Thread(args.GetIsolate()),
+        delay_(args[1]->Int32Value()),
+        func_(new JsValue(args.GetIsolate(), args[0])),
         args_(CONVERT_ARGUMENTS(args, 2)) {
   }
 
@@ -66,7 +67,11 @@ namespace file_system_object {
 
 class IoThread : public Thread {
  public:
-  IoThread() : file_system_(env_->GetFileSystem()) {}
+  IoThread(v8::Isolate* isolate, const v8::Handle<v8::Value>& value)
+      : Thread(isolate),
+        file_system_(env_->GetFileSystem()),
+        callback_(new JsValue(isolate, value)) {
+  }
 
  protected:
   FileSystemPtr file_system_;
@@ -76,8 +81,8 @@ class IoThread : public Thread {
 class ReadThread : public IoThread {
  public:
   explicit ReadThread(const v8::FunctionCallbackInfo<v8::Value>& args)
-      : path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
-    callback_ = JsValuePtr(new JsValue(env_->isolate(), args[1]));
+      : IoThread(args.GetIsolate(), args[1]),
+        path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
   }
 
  private:
@@ -89,9 +94,9 @@ class ReadThread : public IoThread {
 class WriteThread : public IoThread {
  public:
   explicit WriteThread(const v8::FunctionCallbackInfo<v8::Value>& args)
-      : path_(V8_STRING_TO_STD_STRING(args[0]->ToString())),
+      : IoThread(args.GetIsolate(), args[2]),
+        path_(V8_STRING_TO_STD_STRING(args[0]->ToString())),
         data_(V8_STRING_TO_STD_STRING(args[1]->ToString())) {
-    callback_ = JsValuePtr(new JsValue(env_->isolate(), args[2]));
   }
 
  private:
@@ -104,8 +109,8 @@ class WriteThread : public IoThread {
 class RemoveThread : public IoThread {
  public:
   explicit RemoveThread(const v8::FunctionCallbackInfo<v8::Value>& args)
-      : path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
-    callback_ = JsValuePtr(new JsValue(env_->isolate(), args[1]));
+      : IoThread(args.GetIsolate(), args[1]),
+        path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
   }
 
  private:
@@ -117,9 +122,9 @@ class RemoveThread : public IoThread {
 class MoveThread : public IoThread {
  public:
   explicit MoveThread(const v8::FunctionCallbackInfo<v8::Value>& args)
-      : from_(V8_STRING_TO_STD_STRING(args[0]->ToString())),
+      : IoThread(args.GetIsolate(), args[2]),
+        from_(V8_STRING_TO_STD_STRING(args[0]->ToString())),
         to_(V8_STRING_TO_STD_STRING(args[1]->ToString())) {
-    callback_ = JsValuePtr(new JsValue(env_->isolate(), args[2]));
   }
 
  private:
@@ -132,8 +137,8 @@ class MoveThread : public IoThread {
 class StatThread : public IoThread {
  public:
   explicit StatThread(const v8::FunctionCallbackInfo<v8::Value>& args)
-      : path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
-    callback_ = JsValuePtr(new JsValue(env_->isolate(), args[1]));
+      : IoThread(args.GetIsolate(), args[1]),
+        path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
   }
 
  private:
@@ -150,9 +155,10 @@ namespace web_request_object {
 class WebRequestThread : public Thread {
  public:
   explicit WebRequestThread(const v8::FunctionCallbackInfo<v8::Value>& args)
-      : web_request_(env_->GetWebRequest()),
+      : Thread(args.GetIsolate()),
+        web_request_(env_->GetWebRequest()),
         url_(V8_STRING_TO_STD_STRING(args[0]->ToString())),
-        callback_(new JsValue(env_->isolate(), args[2])) {
+        callback_(new JsValue(args.GetIsolate(), args[2])) {
     auto obj = v8::Handle<v8::Object>::Cast<v8::Value>(args[1]);
     v8::Local<v8::Array> properties = obj->GetOwnPropertyNames();
     for (uint32_t idx = 0; idx < properties->Length(); ++idx) {
