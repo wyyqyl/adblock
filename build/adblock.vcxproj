@@ -44,7 +44,7 @@
     </CustomBuild>
     <CustomBuild Include="..\tools\js2c.py">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python ..\tools\js2c.py $(IntDir)adblock.js.cpp ..\lib\compat.js ..\lib\api.js ..\lib\filterClasses.js ..\lib\matcher.js</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python ..\tools\js2c.py $(IntDir)adblock.js.cpp true ..\lib\compat.js ..\lib\api.js ..\lib\filterClasses.js ..\lib\matcher.js</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)adblock.js.cpp</Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\compat.js;..\lib\api.js;..\lib\filterClasses.js;..\lib\matcher.js</AdditionalInputs>
     </CustomBuild>

@@ -209,7 +209,7 @@ std::string js_sources[] = { %(source_lines)sstd::string() };
 SOURCE_DECLARATION = 'std::string("%(name)s"), std::string(sources + %(offset)i, %(raw_length)i), '
 
 
-def JS2C(source, target):
+def JS2C(source, debug, target):
   ids = []
   modules = []
   # Locate the macros file name.
@@ -220,6 +220,12 @@ def JS2C(source, target):
       (consts, macros) = ReadMacros(ReadLines(str(s)))
     else:
       modules.append(s)
+
+  debug_js_dir = ""
+  if debug:
+    debug_js_dir = os.path.join(os.path.split(str(target))[0], 'js');
+    if not os.path.isdir(debug_js_dir):
+      os.makedirs(debug_js_dir)
 
   module_offset = 0
   all_sources = []
@@ -235,6 +241,10 @@ def JS2C(source, target):
     ids.append((id, raw_length, module_offset))
     all_sources.append(lines)
     module_offset += raw_length
+    if debug:
+      debug_js = open(os.path.join(debug_js_dir, id), 'w')
+      debug_js.write(lines)
+      debug_js.close()
 
   sources_data = ToCAsciiArray("".join(all_sources))
 
@@ -257,8 +267,9 @@ def JS2C(source, target):
 
 def main():
   natives = sys.argv[1]
-  source_files = sys.argv[2:]
-  JS2C(source_files, natives)
+  debug = sys.argv[2]
+  source_files = sys.argv[3:]
+  JS2C(source_files, debug, natives)
 
 if __name__ == "__main__":
   main()

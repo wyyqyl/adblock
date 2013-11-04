@@ -65,7 +65,7 @@ def updatePSL():
   """
 
   psl = getPublicSuffixList()
-  file = open(os.path.join('lib', 'publicSuffixList.js'), 'w')
+  file = open(os.path.join('../lib', 'publicSuffixList.js'), 'w')
   print >> file, 'var publicSuffixes = ' + json.dumps(psl, sort_keys=True, indent=4, separators=(',', ': ')) + ';'
   file.close()
 
