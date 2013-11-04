@@ -13,6 +13,8 @@ void CreateInstance(AdBlockPtr *adblock) {
   AdBlockImpl *result = new AdBlockImpl();
   if (result->Init()) {
     *adblock = AdBlockPtr(result);
+  } else {
+    delete result;
   }
 }
 
