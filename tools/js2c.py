@@ -229,7 +229,7 @@ def JS2C(source, target):
     lines = ExpandConstants(lines, consts)
     lines = ExpandMacros(lines, macros)
     Validate(lines, filename)
-    lines = minify(lines, mangle=True, mangle_toplevel=True)
+    lines = minify(lines, mangle=True)
     id = os.path.split(filename)[1]
     raw_length = len(lines)
     ids.append((id, raw_length, module_offset))
