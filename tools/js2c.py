@@ -73,21 +73,6 @@ def ReadLines(filename):
   return result
 
 
-def LoadConfigFrom(name):
-  import ConfigParser
-  config = ConfigParser.ConfigParser()
-  config.read(name)
-  return config
-
-
-def ParseValue(string):
-  string = string.strip()
-  if string.startswith('[') and string.endswith(']'):
-    return string.lstrip('[').rstrip(']').split()
-  else:
-    return string
-
-
 EVAL_PATTERN = re.compile(r'\beval\s*\(')
 WITH_PATTERN = re.compile(r'\bwith\s*\(')
 
@@ -220,7 +205,9 @@ std::string js_sources[] = { %(source_lines)sstd::string() };
 }  // namespace adblock
 """
 
+
 SOURCE_DECLARATION = 'std::string("%(name)s"), std::string(sources + %(offset)i, %(raw_length)i), '
+
 
 def JS2C(source, target):
   ids = []
@@ -253,8 +240,6 @@ def JS2C(source, target):
 
   # Build source code lines
   source_lines = [ ]
-
-  i = 0
   for (id, raw_length, module_offset) in ids:
     source_lines.append(SOURCE_DECLARATION % {
       'name': id,
@@ -263,7 +248,7 @@ def JS2C(source, target):
       })
 
   # Emit result
-  output = open(str(target[0]), "w")
+  output = open(str(target), "w")
   output.write(HEADER_TEMPLATE % {
     'sources_data': sources_data,
     'source_lines': "".join(source_lines)
@@ -273,7 +258,7 @@ def JS2C(source, target):
 def main():
   natives = sys.argv[1]
   source_files = sys.argv[2:]
-  JS2C(source_files, [natives])
+  JS2C(source_files, natives)
 
 if __name__ == "__main__":
   main()
