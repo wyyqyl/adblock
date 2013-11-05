@@ -206,7 +206,7 @@ std::string js_sources[] = { %(source_lines)sstd::string() };
 """
 
 
-SOURCE_DECLARATION = 'std::string("%(name)s"), std::string(sources + %(offset)i, %(raw_length)i), '
+SOURCE_DECLARATION = 'std::string("%(name)s"), std::string(sources + %(offset)i, %(raw_length)iu), '
 
 
 def JS2C(source, debug, target):
