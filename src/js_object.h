@@ -3,7 +3,6 @@
 
 #include "env.h"
 #include "utils.h"
-#include <boost/thread/thread.hpp>
 
 namespace adblock {
 
@@ -14,9 +13,10 @@ class Thread {
   }
   virtual ~Thread() {}
 
-  void Start() {
+  virtual int32_t Start() {
     boost::thread t = boost::thread(&Thread::Run, this);
     t.detach();
+    return -1;
   }
 
  protected:
@@ -54,6 +54,8 @@ class TimeoutThread : public Thread {
         func_(new JsValue(args.GetIsolate(), args[0])),
         args_(CONVERT_ARGUMENTS(args, 2)) {
   }
+
+  int32_t Start();
 
  private:
   int delay_;

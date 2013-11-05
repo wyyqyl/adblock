@@ -22,11 +22,16 @@ Environment::Environment(const v8::Local<v8::Context>& context)
     : isolate_(context->GetIsolate()),
       context_(context->GetIsolate(), context) {
   event_map_.clear();
+  timeout_threads_.clear();
 }
 
 Environment::~Environment() {
   context_->SetAlignedPointerInEmbedderData(kContextEmbedderDataIndex,
                                              nullptr);
+  for (auto it = timeout_threads_.begin(); it != timeout_threads_.end(); ++it) {
+    (*it)->interrupt();
+    (*it)->join();
+  }
 }
 
 Environment* Environment::New(const v8::Local<v8::Context>& context) {

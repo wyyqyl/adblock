@@ -6,8 +6,11 @@
 #include "log_system.h"
 #include "web_request.h"
 
+#include <list>
+
 #include <boost/unordered/unordered_map.hpp>
 #include <boost/function.hpp>
+#include <boost/thread/thread.hpp>
 
 namespace adblock {
 
@@ -21,6 +24,7 @@ namespace adblock {
 
 typedef boost::function<void(const JsValueList& args)> EventCallback;
 typedef boost::unordered_map<std::string, EventCallback> EventMap;
+typedef std::list<boost::shared_ptr<boost::thread>> TimeoutThreads;
 
 class Environment {
  public:
@@ -50,6 +54,10 @@ class Environment {
   void SetWebRequest(WebRequestPtr web_reqeust);
   WebRequestPtr GetWebRequest();
 
+  inline TimeoutThreads& GetTimeoutThreads() {
+    return timeout_threads_;
+  }
+
  private:
   explicit Environment(const v8::Local<v8::Context>& context);
   ~Environment();
@@ -61,6 +69,7 @@ class Environment {
   v8::Isolate* const isolate_;
   JsData<v8::Context> context_;
   EventMap event_map_;
+  TimeoutThreads timeout_threads_;
   FileSystemPtr file_system_;
   LogSystemPtr log_system_;
   WebRequestPtr web_request_;

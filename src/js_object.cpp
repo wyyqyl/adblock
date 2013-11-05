@@ -2,6 +2,7 @@
 #include "js_error.h"
 
 #include <boost/filesystem/operations.hpp>
+#include <boost/make_shared.hpp>
 
 namespace adblock {
 namespace js_object {
@@ -39,9 +40,20 @@ inline void ADB_SET_OBJECT(const T& recv,
   v8::HandleScope handle_scope(isolate);                                      \
   v8::Context::Scope context_scope(env->context())
 
+int32_t TimeoutThread::Start() {
+  auto threads = env_->GetTimeoutThreads();
+  threads.emplace_back(
+    boost::make_shared<boost::thread>(&TimeoutThread::Run, this));
+  return threads.size() - 1;
+}
+
 void TimeoutThread::Run() {
-  boost::this_thread::sleep(boost::posix_time::milliseconds(delay_));
-  func_->Call(args_, env_);
+  try {
+    boost::this_thread::sleep(boost::posix_time::milliseconds(delay_));
+    func_->Call(args_, env_);
+  } catch (const boost::thread_interrupted&) {
+    delete this;
+  }
   delete this;
 }
 
@@ -56,7 +68,24 @@ void SetTimeoutCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   }
 
   Thread* thread = new TimeoutThread(args);
-  thread->Start();
+  args.GetReturnValue().Set(thread->Start());
+}
+
+void ClearTimeoutCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  if (args.Length() != 1) {
+    ADB_THROW_EXCEPTION(isolate, "clearTimeout requires 1 parameter!");
+  }
+  if (!args[0]->IsInt32()) {
+    ADB_THROW_EXCEPTION(isolate,
+                        "First argument to clearTimeout must be a number!");
+  }
+  auto threads = Environment::GetCurrent(isolate)->GetTimeoutThreads();
+  auto it = threads.begin();
+  advance(it, args[0]->Int32Value());
+  (*it)->interrupt();
+  (*it)->join();
+  threads.erase(it);
 }
 
 void TriggerCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -72,11 +101,12 @@ void TriggerCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
 void Setup(Environment* env) {
   auto global = env->context()->Global();
-  ADB_SET_METHOD(global, "setTimeout",  SetTimeoutCallback);
-  ADB_SET_METHOD(global, "trigger",     TriggerCallback);
-  ADB_SET_OBJECT(global, "fileSystem",  file_system_object::Setup(env));
-  ADB_SET_OBJECT(global, "webRequest",  web_request_object::Setup(env));
-  ADB_SET_OBJECT(global, "console",     console_object::Setup(env));
+  ADB_SET_METHOD(global, "setTimeout",    SetTimeoutCallback);
+  ADB_SET_METHOD(global, "clearTimeout",  ClearTimeoutCallback);
+  ADB_SET_METHOD(global, "trigger",       TriggerCallback);
+  ADB_SET_OBJECT(global, "fileSystem",    file_system_object::Setup(env));
+  ADB_SET_OBJECT(global, "webRequest",    web_request_object::Setup(env));
+  ADB_SET_OBJECT(global, "console",       console_object::Setup(env));
 }
 
 namespace file_system_object {
