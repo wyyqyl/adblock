@@ -111,5 +111,8 @@
     <None Include="..\lib\info.js">
       <Filter>Resource Files\lib</Filter>
     </None>
+    <None Include="..\lib\punycode.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
   </ItemGroup>
 </Project>
