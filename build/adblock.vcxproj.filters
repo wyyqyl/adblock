@@ -111,7 +111,13 @@
     <None Include="..\lib\info.js">
       <Filter>Resource Files\lib</Filter>
     </None>
-    <None Include="..\lib\punycode.js">
+    <None Include="..\lib\updater.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
+    <None Include="..\lib\init.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
+    <None Include="..\lib\prefs.js">
       <Filter>Resource Files\lib</Filter>
     </None>
   </ItemGroup>
