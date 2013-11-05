@@ -9,7 +9,9 @@ namespace adblock {
 
 class Thread {
  public:
-  Thread(v8::Isolate* isolate) : env_(Environment::GetCurrent(isolate)) {}
+  explicit Thread(v8::Isolate* isolate)
+      : env_(Environment::GetCurrent(isolate)) {
+  }
   virtual ~Thread() {}
 
   void Start() {

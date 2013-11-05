@@ -44,12 +44,15 @@
     </CustomBuild>
     <CustomBuild Include="..\tools\js2c.py">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python ..\tools\js2c.py $(IntDir)adblock.js.cpp true ..\lib\compat.js ..\lib\api.js ..\lib\filterClasses.js ..\lib\matcher.js</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python ..\tools\js2c.py $(IntDir)adblock.js.cpp true ..\lib\test.js ..\lib\compat.js ..\lib\info.js ..\lib\publicSuffixList.js ..\lib\filterClasses.js ..\lib\matcher.js ..\lib\elemHide.js ..\lib\downloader.js ..\lib\api.js</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)adblock.js.cpp</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\compat.js;..\lib\api.js;..\lib\filterClasses.js;..\lib\matcher.js</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\test.js;..\lib\compat.js;..\lib\info.js;..\lib\publicSuffixList.js;..\lib\filterClasses.js;..\lib\matcher.js;..\lib\elemHide.js;..\lib\downloader.js;..\lib\api.js</AdditionalInputs>
     </CustomBuild>
     <None Include="..\lib\compat.js" />
+    <None Include="..\lib\downloader.js" />
+    <None Include="..\lib\elemHide.js" />
     <None Include="..\lib\filterClasses.js" />
+    <None Include="..\lib\info.js" />
     <None Include="..\lib\matcher.js" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

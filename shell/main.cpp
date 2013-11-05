@@ -8,6 +8,7 @@ int main() {
   try {
     adblock::AdBlockPtr adblock;
     adblock::CreateInstance(&adblock);
+    std::cout << "Press any key to continue . . . " << std::endl;
     getchar();
   } catch (const std::exception& e) {
     OutputDebugStringA(e.what());
