@@ -222,7 +222,7 @@ def JS2C(source, debug, target):
       modules.append(s)
 
   debug_js_dir = ""
-  if debug:
+  if not debug:
     debug_js_dir = os.path.join(os.path.split(str(target))[0], 'js');
     if not os.path.isdir(debug_js_dir):
       os.makedirs(debug_js_dir)
@@ -235,13 +235,15 @@ def JS2C(source, debug, target):
     lines = ExpandConstants(lines, consts)
     lines = ExpandMacros(lines, macros)
     Validate(lines, filename)
-    lines = minify(lines, mangle=True)
+    minified = minify(lines, mangle=True)
+    if not debug:
+      lines = minified
     id = os.path.split(filename)[1]
     raw_length = len(lines)
     ids.append((id, raw_length, module_offset))
     all_sources.append(lines)
     module_offset += raw_length
-    if debug:
+    if not debug:
       debug_js = open(os.path.join(debug_js_dir, id), 'w')
       debug_js.write(lines)
       debug_js.close()
