@@ -31,6 +31,8 @@ Environment::~Environment() {
   for (auto it = timeout_threads_.begin(); it != timeout_threads_.end(); ++it) {
     (*it)->interrupt();
     (*it)->join();
+    delete *it;
+    *it = nullptr;
   }
 }
 

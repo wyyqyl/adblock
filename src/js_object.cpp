@@ -40,18 +40,33 @@ inline void ADB_SET_OBJECT(const T& recv,
   v8::HandleScope handle_scope(isolate);                                      \
   v8::Context::Scope context_scope(env->context())
 
-int32_t TimeoutThread::Start() {
-  TimeoutThreads& threads = env_->GetTimeoutThreads();
-  threads.emplace_back(
-    boost::make_shared<boost::thread>(&TimeoutThread::Run, this));
-  return threads.size() - 1;
+boost::thread* TimeoutThread::Start() {
+  ThreadGroup& threads = env_->GetTimeoutThreads();
+  boost::thread* thread = new boost::thread();
+  *thread = boost::thread(boost::bind(&TimeoutThread::Run, this, thread));
+  threads.push_back(thread);
+  return thread;
 }
 
-void TimeoutThread::Run() {
+void TimeoutThread::Run(boost::thread* thread) {
   try {
     boost::this_thread::sleep(boost::posix_time::milliseconds(delay_));
     func_->Call(args_, env_);
   } catch (const boost::thread_interrupted&) {
+    // If the function is interrupted, we DO NOT remove the thread from
+    // ThreadGroup or delete the thread. Otherwise, Thread::join() will throw
+    // exception, reporting that the thread is not joinable for the thread
+    // is deleted by us.
+    delete this;
+    return;
+  }
+
+  ThreadGroup& threads = env_->GetTimeoutThreads();
+  auto it = std::find(threads.begin(), threads.end(), thread);
+  assert(it != threads.end());
+  if (it != threads.end()) {
+    delete thread;
+    threads.erase(it);
   }
   delete this;
 }
@@ -67,7 +82,7 @@ void SetTimeoutCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   }
 
   Thread* thread = new TimeoutThread(args);
-  args.GetReturnValue().Set(thread->Start());
+  args.GetReturnValue().Set(v8::External::New(thread->Start()));
 }
 
 void ClearTimeoutCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -75,17 +90,21 @@ void ClearTimeoutCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   if (args.Length() != 1) {
     ADB_THROW_EXCEPTION(isolate, "clearTimeout requires 1 parameter!");
   }
-  if (!args[0]->IsInt32()) {
+  if (!args[0]->IsExternal()) {
     ADB_THROW_EXCEPTION(isolate,
-                        "First argument to clearTimeout must be a number!");
+                        "First argument to clearTimeout must be a external!");
   }
-  TimeoutThreads& threads =
-    Environment::GetCurrent(isolate)->GetTimeoutThreads();
-  auto it = threads.begin();
-  std::advance(it, args[0]->Int32Value());
-  (*it)->interrupt();
-  (*it)->join();
-  threads.erase(it);
+
+  auto external = v8::Local<v8::External>::Cast(args[0]);
+  auto thread = static_cast<boost::thread*>(external->Value());
+  ThreadGroup& threads = Environment::GetCurrent(isolate)->GetTimeoutThreads();
+  auto it = std::find(threads.begin(), threads.end(), thread);
+  if (it != threads.end()) {
+    thread->interrupt();
+    thread->join();
+    delete thread;
+    threads.erase(it);
+  }
 }
 
 void TriggerCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {

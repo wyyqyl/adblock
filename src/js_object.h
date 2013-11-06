@@ -13,10 +13,10 @@ class Thread {
   }
   virtual ~Thread() {}
 
-  virtual int32_t Start() {
+  virtual boost::thread* Start() {
     boost::thread t = boost::thread(&Thread::Run, this);
     t.detach();
-    return -1;
+    return nullptr;
   }
 
  protected:
@@ -55,14 +55,15 @@ class TimeoutThread : public Thread {
         args_(CONVERT_ARGUMENTS(args, 2)) {
   }
 
-  int32_t Start();
+  boost::thread* Start();
 
  private:
   int delay_;
   JsValuePtr func_;
   JsValueList args_;
 
-  void Run();
+  void Run(boost::thread* thread);
+  void Run() {}
 };
 
 void Setup(Environment* env);
