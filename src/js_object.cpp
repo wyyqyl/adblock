@@ -41,7 +41,7 @@ inline void ADB_SET_OBJECT(const T& recv,
   v8::Context::Scope context_scope(env->context())
 
 int32_t TimeoutThread::Start() {
-  auto threads = env_->GetTimeoutThreads();
+  TimeoutThreads& threads = env_->GetTimeoutThreads();
   threads.emplace_back(
     boost::make_shared<boost::thread>(&TimeoutThread::Run, this));
   return threads.size() - 1;
@@ -52,7 +52,6 @@ void TimeoutThread::Run() {
     boost::this_thread::sleep(boost::posix_time::milliseconds(delay_));
     func_->Call(args_, env_);
   } catch (const boost::thread_interrupted&) {
-    delete this;
   }
   delete this;
 }
@@ -80,9 +79,10 @@ void ClearTimeoutCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ADB_THROW_EXCEPTION(isolate,
                         "First argument to clearTimeout must be a number!");
   }
-  auto threads = Environment::GetCurrent(isolate)->GetTimeoutThreads();
+  TimeoutThreads& threads =
+    Environment::GetCurrent(isolate)->GetTimeoutThreads();
   auto it = threads.begin();
-  advance(it, args[0]->Int32Value());
+  std::advance(it, args[0]->Int32Value());
   (*it)->interrupt();
   (*it)->join();
   threads.erase(it);
