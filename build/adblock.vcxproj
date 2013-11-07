@@ -44,14 +44,16 @@
     </CustomBuild>
     <CustomBuild Include="..\tools\js2c.py">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python ..\tools\js2c.py $(IntDir)adblock.js.cpp true ..\lib\compat.js ..\lib\punycode.js ..\lib\prefs.js ..\lib\info.js ..\lib\publicSuffixList.js ..\lib\filterClasses.js ..\lib\matcher.js ..\lib\elemHide.js ..\lib\downloader.js ..\lib\updater.js ..\lib\subscriptionClasses.js ..\lib\filterStorage.js ..\lib\api.js ..\lib\init.js ..\lib\test.js</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python ..\tools\js2c.py $(IntDir)adblock.js.cpp true ..\lib\compat.js ..\lib\punycode.js ..\lib\prefs.js ..\lib\info.js ..\lib\publicSuffixList.js ..\lib\filterNotifier.js ..\lib\filterClasses.js ..\lib\matcher.js ..\lib\elemHide.js ..\lib\downloader.js ..\lib\updater.js ..\lib\subscriptionClasses.js ..\lib\filterStorage.js ..\lib\filterListener.js ..\lib\api.js ..\lib\init.js</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)adblock.js.cpp</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\compat.js;..\lib\punycode.js;..\lib\prefs.js;..\lib\info.js;..\lib\publicSuffixList.js;..\lib\filterClasses.js;..\lib\matcher.js;..\lib\elemHide.js;..\lib\downloader.js;..\lib\updater.js;..\lib\subscriptionClasses.js;..\lib\filterStorage.js;..\lib\api.js;..\lib\init.js;..\lib\test.js</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\compat.js;..\lib\punycode.js;..\lib\prefs.js;..\lib\info.js;..\lib\publicSuffixList.js;..\lib\filterNotifier.js;..\lib\filterClasses.js;..\lib\matcher.js;..\lib\elemHide.js;..\lib\downloader.js;..\lib\updater.js;..\lib\subscriptionClasses.js;..\lib\filterStorage.js;..\lib\filterListener.js;..\lib\api.js;..\lib\init.js</AdditionalInputs>
     </CustomBuild>
     <None Include="..\lib\compat.js" />
     <None Include="..\lib\downloader.js" />
     <None Include="..\lib\elemHide.js" />
     <None Include="..\lib\filterClasses.js" />
+    <None Include="..\lib\filterListener.js" />
+    <None Include="..\lib\filterNotifier.js" />
     <None Include="..\lib\filterStorage.js" />
     <None Include="..\lib\info.js" />
     <None Include="..\lib\init.js" />
@@ -96,7 +98,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;ENABLE_DEBUGGER_SUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

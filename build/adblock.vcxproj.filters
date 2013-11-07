@@ -126,5 +126,11 @@
     <None Include="..\lib\subscriptionClasses.js">
       <Filter>Resource Files\lib</Filter>
     </None>
+    <None Include="..\lib\filterNotifier.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
+    <None Include="..\lib\filterListener.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
   </ItemGroup>
 </Project>
