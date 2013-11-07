@@ -59,6 +59,9 @@ void TimeoutThread::Run(boost::thread* thread) {
     // is deleted by us.
     delete this;
     return;
+  } catch (const std::exception& e) {
+    // func_->Call(args_, env_) throws error
+    std::cerr << e.what() << std::endl;
   }
 
   ThreadGroup& threads = env_->GetTimeoutThreads();
@@ -152,7 +155,11 @@ void ReadThread::Run() {
 
   CallParams params;
   params.push_back(result);
-  callback_->Call(params);
+  try {
+    callback_->Call(params);
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
 
   delete this;
 }
@@ -173,7 +180,11 @@ void WriteThread::Run() {
   auto result = v8::String::NewFromUtf8(isolate, error.c_str());
   CallParams params;
   params.push_back(result);
-  callback_->Call(params);
+  try {
+    callback_->Call(params);
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
 
   delete this;
 }
@@ -199,7 +210,11 @@ void RemoveThread::Run() {
   auto result = v8::String::NewFromUtf8(isolate, error.c_str());
   CallParams params;
   params.push_back(result);
-  callback_->Call(params);
+  try {
+    callback_->Call(params);
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
 
   delete this;
 }
@@ -220,7 +235,11 @@ void MoveThread::Run() {
   auto result = v8::String::NewFromUtf8(isolate, error.c_str());
   CallParams params;
   params.push_back(result);
-  callback_->Call(params);
+  try {
+    callback_->Call(params);
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
 
   delete this;
 }
@@ -253,7 +272,11 @@ void StatThread::Run() {
 
   CallParams params;
   params.push_back(result);
-  callback_->Call(params);
+  try {
+    callback_->Call(params);
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
 
   delete this;
 }
@@ -379,7 +402,11 @@ void WebRequestThread::Run() {
 
   CallParams params;
   params.push_back(result);
-  callback_->Call(params);
+  try {
+    callback_->Call(params);
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
 
   delete this;
 }
