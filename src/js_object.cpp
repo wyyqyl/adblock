@@ -141,8 +141,6 @@ void ReadThread::Run() {
     content = file_system_->Read(path_);
   } catch (const std::exception& e) {
     error = e.what();
-  } catch (...) {
-    error = "Unknown error occurred while reading from " + path_;
   }
 
   SETUP_THREAD_CONTEXT(env_);
@@ -171,8 +169,6 @@ void WriteThread::Run() {
     file_system_->Write(path_, data_);
   } catch (const std::exception& e) {
     error = e.what();
-  } catch (...) {
-    error = "Unknown error occurred while writing to " + path_;
   }
 
   SETUP_THREAD_CONTEXT(env_);
@@ -197,8 +193,6 @@ void RemoveThread::Run() {
     removed = file_system_->Remove(path_);
   } catch (const boost::filesystem::filesystem_error& e) {
     error = e.what();
-  } catch (...) {
-    error = "Unknown error occurred while removing " + path_;
   }
 
   if (!removed && error.length() == 0) {
@@ -226,8 +220,6 @@ void MoveThread::Run() {
     file_system_->Move(from_, to_);
   } catch (const boost::filesystem::filesystem_error& e) {
     error = e.what();
-  } catch (...) {
-    error = "Unknown error occurred while moving " + from_ + " to " + to_;
   }
 
   SETUP_THREAD_CONTEXT(env_);
@@ -252,8 +244,6 @@ void StatThread::Run() {
     stat_result = file_system_->Stat(path_);
   } catch (const boost::filesystem::filesystem_error& e) {
     error = e.what();
-  } catch (...) {
-    error = "Unknown error occurred while stating " + path_;
   }
 
   SETUP_THREAD_CONTEXT(env_);
