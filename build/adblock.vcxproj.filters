@@ -120,5 +120,11 @@
     <None Include="..\lib\prefs.js">
       <Filter>Resource Files\lib</Filter>
     </None>
+    <None Include="..\lib\filterStorage.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
+    <None Include="..\lib\subscriptionClasses.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
   </ItemGroup>
 </Project>
