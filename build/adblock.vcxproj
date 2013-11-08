@@ -44,9 +44,9 @@
     </CustomBuild>
     <CustomBuild Include="..\tools\js2c.py">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python ..\tools\js2c.py $(IntDir)adblock.js.cpp true ..\lib\compat.js ..\lib\punycode.js ..\lib\prefs.js ..\lib\info.js ..\lib\publicSuffixList.js ..\lib\filterNotifier.js ..\lib\filterClasses.js ..\lib\matcher.js ..\lib\elemHide.js ..\lib\downloader.js ..\lib\updater.js ..\lib\subscriptionClasses.js ..\lib\filterStorage.js ..\lib\filterListener.js ..\lib\api.js ..\lib\init.js</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python ..\tools\js2c.py $(IntDir)adblock.js.cpp true ..\lib\compat.js ..\lib\subscriptions.js ..\lib\punycode.js ..\lib\prefs.js ..\lib\utils.js ..\lib\info.js ..\lib\publicSuffixList.js ..\lib\filterNotifier.js ..\lib\filterClasses.js ..\lib\matcher.js ..\lib\elemHide.js ..\lib\downloader.js ..\lib\updater.js ..\lib\subscriptionClasses.js ..\lib\filterStorage.js ..\lib\filterListener.js ..\lib\synchronizer.js ..\lib\api.js ..\lib\init.js</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)adblock.js.cpp</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\compat.js;..\lib\punycode.js;..\lib\prefs.js;..\lib\info.js;..\lib\publicSuffixList.js;..\lib\filterNotifier.js;..\lib\filterClasses.js;..\lib\matcher.js;..\lib\elemHide.js;..\lib\downloader.js;..\lib\updater.js;..\lib\subscriptionClasses.js;..\lib\filterStorage.js;..\lib\filterListener.js;..\lib\api.js;..\lib\init.js</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\compat.js;..\lib\subscriptions.js;..\lib\punycode.js;..\lib\prefs.js;..\lib\utils.js;..\lib\info.js;..\lib\publicSuffixList.js;..\lib\filterNotifier.js;..\lib\filterClasses.js;..\lib\matcher.js;..\lib\elemHide.js;..\lib\downloader.js;..\lib\updater.js;..\lib\subscriptionClasses.js;..\lib\filterStorage.js;..\lib\filterListener.js;..\lib\synchronizer.js;..\lib\api.js;..\lib\init.js</AdditionalInputs>
     </CustomBuild>
     <None Include="..\lib\compat.js" />
     <None Include="..\lib\downloader.js" />
@@ -60,7 +60,9 @@
     <None Include="..\lib\matcher.js" />
     <None Include="..\lib\prefs.js" />
     <None Include="..\lib\subscriptionClasses.js" />
+    <None Include="..\lib\synchronizer.js" />
     <None Include="..\lib\updater.js" />
+    <None Include="..\lib\utils.js" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A2E47735-3EC7-438C-AE82-0461D31C2043}</ProjectGuid>

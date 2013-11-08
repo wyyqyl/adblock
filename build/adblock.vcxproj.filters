@@ -132,5 +132,11 @@
     <None Include="..\lib\filterListener.js">
       <Filter>Resource Files\lib</Filter>
     </None>
+    <None Include="..\lib\synchronizer.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
+    <None Include="..\lib\utils.js">
+      <Filter>Resource Files\lib</Filter>
+    </None>
   </ItemGroup>
 </Project>
