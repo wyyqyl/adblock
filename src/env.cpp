@@ -4,8 +4,8 @@
 namespace {
 
 v8::Handle<v8::Script> CompileScript(v8::Isolate* isolate,
-                                      const std::string& source,
-                                      const std::string& file_name) {
+                                     const std::string& source,
+                                     const std::string& file_name) {
   auto v8_source = v8::String::NewFromUtf8(isolate, source.c_str());
   if (file_name.length()) {
     auto v8_file_name = v8::String::NewFromUtf8(isolate, file_name.c_str());
@@ -27,7 +27,7 @@ Environment::Environment(const v8::Local<v8::Context>& context)
 
 Environment::~Environment() {
   context_->SetAlignedPointerInEmbedderData(kContextEmbedderDataIndex,
-                                             nullptr);
+                                            nullptr);
   for (auto it = timeout_threads_.begin(); it != timeout_threads_.end(); ++it) {
     (*it)->interrupt();
     (*it)->join();

@@ -2,7 +2,6 @@
 #include "js_error.h"
 
 #include <boost/filesystem/operations.hpp>
-#include <boost/make_shared.hpp>
 
 namespace adblock {
 namespace js_object {
