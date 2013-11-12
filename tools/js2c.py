@@ -269,7 +269,7 @@ def JS2C(source, debug, target):
 
 def main():
   natives = sys.argv[1]
-  debug = sys.argv[2]
+  debug = sys.argv[2] == 'true'
   source_files = sys.argv[3:]
   JS2C(source_files, debug, natives)
 
