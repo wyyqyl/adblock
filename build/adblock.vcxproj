@@ -40,13 +40,19 @@
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python ..\tools\cpplint.py --filter=-legal/copyright,-build/header_guard,-build/include,-readability/streams --output=vs7 ..\src</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)adblock.log</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\src</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">python ..\tools\cpplint.py --filter=-legal/copyright,-build/header_guard,-build/include,-readability/streams --output=vs7 ..\src</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)adblock.log</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\tools\js2c.py">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">python ..\tools\js2c.py $(IntDir)adblock.js.cpp true ..\lib\compat.js ..\lib\subscriptions.js ..\lib\punycode.js ..\lib\prefs.js ..\lib\utils.js ..\lib\info.js ..\lib\publicSuffixList.js ..\lib\filterNotifier.js ..\lib\filterClasses.js ..\lib\matcher.js ..\lib\elemHide.js ..\lib\downloader.js ..\lib\updater.js ..\lib\subscriptionClasses.js ..\lib\filterStorage.js ..\lib\filterListener.js ..\lib\synchronizer.js ..\lib\api.js ..\lib\init.js</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)adblock.js.cpp</Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\compat.js;..\lib\subscriptions.js;..\lib\punycode.js;..\lib\prefs.js;..\lib\utils.js;..\lib\info.js;..\lib\publicSuffixList.js;..\lib\filterNotifier.js;..\lib\filterClasses.js;..\lib\matcher.js;..\lib\elemHide.js;..\lib\downloader.js;..\lib\updater.js;..\lib\subscriptionClasses.js;..\lib\filterStorage.js;..\lib\filterListener.js;..\lib\synchronizer.js;..\lib\api.js;..\lib\init.js</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">python ..\tools\js2c.py $(IntDir)adblock.js.cpp true ..\lib\compat.js ..\lib\subscriptions.js ..\lib\punycode.js ..\lib\prefs.js ..\lib\utils.js ..\lib\info.js ..\lib\publicSuffixList.js ..\lib\filterNotifier.js ..\lib\filterClasses.js ..\lib\matcher.js ..\lib\elemHide.js ..\lib\downloader.js ..\lib\updater.js ..\lib\subscriptionClasses.js ..\lib\filterStorage.js ..\lib\filterListener.js ..\lib\synchronizer.js ..\lib\api.js ..\lib\init.js</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)adblock.js.cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\lib\compat.js;..\lib\subscriptions.js;..\lib\punycode.js;..\lib\prefs.js;..\lib\utils.js;..\lib\info.js;..\lib\publicSuffixList.js;..\lib\filterNotifier.js;..\lib\filterClasses.js;..\lib\matcher.js;..\lib\elemHide.js;..\lib\downloader.js;..\lib\updater.js;..\lib\subscriptionClasses.js;..\lib\filterStorage.js;..\lib\filterListener.js;..\lib\synchronizer.js;..\lib\api.js;..\lib\init.js</AdditionalInputs>
     </CustomBuild>
     <None Include="..\lib\compat.js" />
     <None Include="..\lib\downloader.js" />
@@ -94,6 +100,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
@@ -115,7 +124,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

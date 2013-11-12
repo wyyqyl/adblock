@@ -88,7 +88,6 @@ bool AdBlockImpl::Init() {
     auto process_val = context->Global()->Get(fun_name);
     auto func = JsValuePtr(new JsValue(isolate, process_val));
     func->Call();
-
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
     return false;
