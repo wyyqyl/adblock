@@ -1,6 +1,6 @@
 #include "js_error.h"
 
-#include <v8.h>
+#include <v8/v8.h>
 #include <sstream>
 #include <string>
 

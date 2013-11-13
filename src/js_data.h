@@ -1,7 +1,7 @@
 #ifndef JS_DATA_H_
 #define JS_DATA_H_
 
-#include <v8.h>
+#include <v8/v8.h>
 
 namespace adblock {
 

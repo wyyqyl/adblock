@@ -2,7 +2,7 @@
 #include "js_object.h"
 
 #ifdef ENABLE_DEBUGGER_SUPPORT
-#include <v8-debug.h>
+#include <v8/v8-debug.h>
 #endif  // ENABLE_DEBUGGER_SUPPORT
 
 #include <boost/bind.hpp>
