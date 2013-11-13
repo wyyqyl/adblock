@@ -54,12 +54,12 @@ class JsData {
     data_.Reset(isolate, data);
   }
 
-  T* operator->() const {
-    return *StrongPersistentToLocal(data_);
-  }
-
   operator v8::Local<T>() const {
     return StrongPersistentToLocal(data_);
+  }
+
+  T* operator->() const {
+    return *operator v8::Local<T>();
   }
 
   operator v8::Persistent<T>() const {
