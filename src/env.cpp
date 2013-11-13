@@ -77,7 +77,7 @@ v8::Local<v8::Context> Environment::context() const {
 }
 
 v8::Local<v8::Value> Environment::Evaluate(const std::string& source,
-                                           const std::string& file_name) {
+    const std::string& file_name/*= std::string()*/) {
   v8::EscapableHandleScope handle_scope(isolate_);
   v8::TryCatch try_catch;
   auto script = CompileScript(isolate_, source, file_name);

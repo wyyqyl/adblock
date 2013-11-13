@@ -37,7 +37,7 @@ class Environment {
   v8::Isolate* isolate() const;
 
   v8::Local<v8::Value> Evaluate(const std::string& source,
-                                const std::string& file_name);
+                                const std::string& file_name = std::string());
 
   void Dispose();
 
