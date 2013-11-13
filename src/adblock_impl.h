@@ -15,9 +15,15 @@ class AdBlockImpl : public AdBlock {
 
   bool Init();
 
+  FilterPtr CheckFilterMatch(const std::string& location,
+                             const std::string& type,
+                             const std::string& document);
+
  private:
   Environment* env_;
   bool is_first_run_;
+  // Hide placeholders of blocked elements
+  bool collapse_;
 
   void InitDone(const JsValueList& args);
 };

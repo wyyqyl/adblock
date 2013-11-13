@@ -1,5 +1,4 @@
 #include "adblock_impl.h"
-#include "env.h"
 #include "js_object.h"
 
 #ifdef ENABLE_DEBUGGER_SUPPORT
@@ -47,7 +46,7 @@ void CreateInstance(AdBlockPtr *adblock) {
   }
 }
 
-AdBlockImpl::AdBlockImpl() : is_first_run_(false) {
+AdBlockImpl::AdBlockImpl() : is_first_run_(false), collapse_(true) {
 }
 
 AdBlockImpl::~AdBlockImpl() {
@@ -98,6 +97,45 @@ bool AdBlockImpl::Init() {
 void AdBlockImpl::InitDone(const JsValueList& args) {
   env_->RemoveEventCallback("init");
   is_first_run_ = args.size() && args.front()->BooleanValue();
+}
+
+FilterPtr AdBlockImpl::CheckFilterMatch(const std::string& location,
+                                        const std::string& type,
+                                        const std::string& document) {
+  v8::Isolate* isolate = env_->isolate();
+  v8::Locker locker(isolate);
+  v8::HandleScope handle_scope(isolate);
+  v8::Context::Scope context_scope(env_->context());
+
+  JsValue func(isolate, env_->Evaluate("API.checkFilterMatch"));
+  CallParams params;
+  params.emplace_back(v8::String::NewFromUtf8(isolate, location.c_str()));
+  params.emplace_back(v8::String::NewFromUtf8(isolate, type.c_str()));
+  params.emplace_back(v8::String::NewFromUtf8(isolate, document.c_str()));
+
+  auto result = v8::Local<v8::Object>::Cast<v8::Value>(func.Call(params));
+  if (result->IsNull()) {
+    return FilterPtr(new Filter());
+  }
+
+  std::string name = V8_STRING_TO_STD_STRING(result->GetConstructorName());
+  if (name == "BlockingFilter") {
+    auto collapse = result->Get(v8::String::NewFromUtf8(isolate, "collapse"));
+    return FilterPtr(new Filter(Filter::TYPE_BLOCKING,
+        collapse->IsNull() ? collapse_ : collapse->BooleanValue()));
+  }
+
+  Filter::Type filter_type = Filter::TYPE_INVALID;
+  if (name == "WhitelistFilter") {
+    filter_type = Filter::TYPE_EXCEPTION;
+  } else if (name == "ElemHideFilter") {
+    filter_type = Filter::TYPE_ELEMHIDE;
+  } else if (name == "ElemHideException") {
+    filter_type = Filter::TYPE_ELEMHIDE_EXCEPTION;
+  } else if (name == "CommentFilter") {
+    filter_type = Filter::TYPE_COMMENT;
+  }
+  return FilterPtr(new Filter(filter_type));
 }
 
 }  // namespace adblock
