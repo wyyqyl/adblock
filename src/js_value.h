@@ -18,10 +18,13 @@ class JsValue {
  public:
   JsValue(v8::Isolate* isolate, const v8::Handle<v8::Value>& value);
 
-  JsValuePtr Call(const JsValueList& args, Environment* env);
-  JsValuePtr Call(const CallParams& args = CallParams(),
-                  Environment* env = nullptr);
+  v8::Local<v8::Value> Call(const JsValueList& args, Environment* env);
+  v8::Local<v8::Value> Call(const CallParams& args = CallParams(),
+                            Environment* env = nullptr);
 
+  inline v8::Local<v8::Value> ToV8Value() const {
+    return value_;
+  }
   inline bool BooleanValue() const {
     return value_->BooleanValue();
   }

@@ -8,7 +8,7 @@ JsValue::JsValue(v8::Isolate* isolate, const v8::Handle<v8::Value>& value)
     : value_(isolate, value) {
 }
 
-JsValuePtr JsValue::Call(const JsValueList& args, Environment* env) {
+v8::Local<v8::Value> JsValue::Call(const JsValueList& args, Environment* env) {
   if (!value_->IsFunction()) {
     throw std::invalid_argument("Attempting to call a non-function");
   }
@@ -25,7 +25,7 @@ JsValuePtr JsValue::Call(const JsValueList& args, Environment* env) {
   return Call(params);
 }
 
-JsValuePtr JsValue::Call(const CallParams& args /*= CallParams()*/,
+v8::Local<v8::Value> JsValue::Call(const CallParams& args /*= CallParams()*/,
                          Environment* env /*= nullptr*/) {
   if (!value_->IsFunction()) {
     throw std::invalid_argument("Attempting to call a non-function");
@@ -39,6 +39,7 @@ JsValuePtr JsValue::Call(const CallParams& args /*= CallParams()*/,
   }
   v8::Local<v8::Context> context(isolate->GetCurrentContext());
   v8::Handle<v8::Object> obj = context->Global();
+  v8::EscapableHandleScope handle_scope(isolate);
 
   v8::TryCatch try_catch;
   auto func = v8::Handle<v8::Function>::Cast<v8::Value>(value_);
@@ -49,7 +50,7 @@ JsValuePtr JsValue::Call(const CallParams& args /*= CallParams()*/,
     throw JsError(isolate, &try_catch);
   }
 
-  return JsValuePtr(new JsValue(isolate, result));
+  return handle_scope.Escape(result);
 }
 
 }  // namespace adblock
