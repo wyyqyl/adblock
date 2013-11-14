@@ -1,6 +1,8 @@
 #include "adblock_impl.h"
 #include "js_object.h"
 
+#define ENABLE_DEBUGGER_SUPPORT
+
 #ifdef ENABLE_DEBUGGER_SUPPORT
 #include <v8/v8-debug.h>
 #endif  // ENABLE_DEBUGGER_SUPPORT
@@ -46,7 +48,10 @@ void CreateInstance(AdBlockPtr *adblock) {
   }
 }
 
-AdBlockImpl::AdBlockImpl() : is_first_run_(false), collapse_(true) {
+AdBlockImpl::AdBlockImpl()
+    : is_first_run_(false),
+      initialized_(false),
+      collapse_(true) {
 }
 
 AdBlockImpl::~AdBlockImpl() {
@@ -59,13 +64,13 @@ AdBlockImpl::~AdBlockImpl() {
 }
 
 bool AdBlockImpl::Init() {
-  v8::Isolate* isolate = v8::Isolate::GetCurrent();
-  v8::Locker locker(isolate);
-  v8::HandleScope handle_scope(isolate);
-  v8::Local<v8::Context> context = v8::Context::New(isolate);
-  v8::Context::Scope context_scope(context);
-
   try {
+    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::Locker locker(isolate);
+    v8::HandleScope handle_scope(isolate);
+    v8::Local<v8::Context> context = v8::Context::New(isolate);
+    v8::Context::Scope context_scope(context);
+
     env_ = Environment::New(context);
     js_object::Setup(env_);
 
@@ -75,7 +80,6 @@ bool AdBlockImpl::Init() {
     debug_message_context.Reset(isolate, context);
     v8::Debug::SetDebugMessageDispatchHandler(DispatchDebugMessages, true);
     v8::Debug::EnableAgent("adblock", 9222, false);
-
     getchar();
 #endif  // ENABLE_DEBUGGER_SUPPORT
 
@@ -85,11 +89,14 @@ bool AdBlockImpl::Init() {
 
     auto fun_name = v8::String::NewFromUtf8(isolate, "initAdblock");
     auto process_val = context->Global()->Get(fun_name);
-    auto func = JsValuePtr(new JsValue(isolate, process_val));
-    func->Call();
+    JsValue(isolate, process_val).Call();
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
     return false;
+  }
+
+  while (!initialized_) {
+    boost::this_thread::sleep(boost::posix_time::microseconds(10));
   }
   return true;
 }
@@ -97,6 +104,7 @@ bool AdBlockImpl::Init() {
 void AdBlockImpl::InitDone(const JsValueList& args) {
   env_->RemoveEventCallback("init");
   is_first_run_ = args.size() && args.front()->BooleanValue();
+  initialized_ = true;
 }
 
 FilterPtr AdBlockImpl::CheckFilterMatch(const std::string& location,

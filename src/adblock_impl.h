@@ -22,6 +22,7 @@ class AdBlockImpl : public AdBlock {
  private:
   Environment* env_;
   bool is_first_run_;
+  bool initialized_;
   // Hide placeholders of blocked elements
   bool collapse_;
 
