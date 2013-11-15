@@ -16,15 +16,20 @@ class Filter {
     TYPE_INVALID
   };
 
-  Filter(Type type = TYPE_INVALID, bool collapse = true)
-      : type_(type), collapse_(collapse) {
+  explicit Filter(Type type = TYPE_INVALID)
+      : type_(type),
+        collapse_(true) {
   }
 
   inline Type type() const {
     return type_;
   }
+
   inline bool collapse() const {
     return collapse_;
+  }
+  inline void set_collapse(bool collapse) {
+    collapse_ = collapse;
   }
 
  private:

@@ -129,8 +129,10 @@ FilterPtr AdBlockImpl::CheckFilterMatch(const std::string& location,
   std::string name = V8_STRING_TO_STD_STRING(result->GetConstructorName());
   if (name == "BlockingFilter") {
     auto collapse = result->Get(v8::String::NewFromUtf8(isolate, "collapse"));
-    return FilterPtr(new Filter(Filter::TYPE_BLOCKING,
-        collapse->IsNull() ? collapse_ : collapse->BooleanValue()));
+    FilterPtr filter = FilterPtr(new Filter(Filter::TYPE_BLOCKING));
+    filter->set_collapse(collapse->IsNull() ?
+        collapse_ : collapse->BooleanValue());
+    return filter;
   }
 
   Filter::Type filter_type = Filter::TYPE_INVALID;
