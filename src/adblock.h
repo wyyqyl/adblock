@@ -2,6 +2,7 @@
 #define ADBLOCK_H_
 
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace adblock {
 
@@ -47,6 +48,8 @@ class AdBlock {
   virtual FilterPtr CheckFilterMatch(const std::string& location,
                                      const std::string& type,
                                      const std::string& document) = 0;
+  virtual std::vector<std::string> GetElementHidingSelectors(
+      const std::string& domain) = 0;
 };
 
 typedef boost::shared_ptr<AdBlock> AdBlockPtr;

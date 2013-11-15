@@ -33,12 +33,6 @@ inline void ADB_SET_OBJECT(const T& recv,
     return;                                                                   \
   } while (0)
 
-#define SETUP_THREAD_CONTEXT(env)                                             \
-  v8::Isolate* isolate = env->isolate();                                      \
-  v8::Locker locker(isolate);                                                 \
-  v8::HandleScope handle_scope(isolate);                                      \
-  v8::Context::Scope context_scope(env->context())
-
 boost::thread* TimeoutThread::Start() {
   ThreadGroup& threads = env_->GetTimeoutThreads();
   boost::thread* thread = new boost::thread();

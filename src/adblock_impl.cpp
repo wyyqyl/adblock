@@ -110,10 +110,7 @@ void AdBlockImpl::InitDone(const JsValueList& args) {
 FilterPtr AdBlockImpl::CheckFilterMatch(const std::string& location,
                                         const std::string& type,
                                         const std::string& document) {
-  v8::Isolate* isolate = env_->isolate();
-  v8::Locker locker(isolate);
-  v8::HandleScope handle_scope(isolate);
-  v8::Context::Scope context_scope(env_->context());
+  SETUP_THREAD_CONTEXT(env_);
 
   JsValue func(isolate, env_->Evaluate("API.checkFilterMatch"));
   CallParams params;
@@ -146,6 +143,22 @@ FilterPtr AdBlockImpl::CheckFilterMatch(const std::string& location,
     filter_type = Filter::TYPE_COMMENT;
   }
   return FilterPtr(new Filter(filter_type));
+}
+
+std::vector<std::string> AdBlockImpl::GetElementHidingSelectors(
+    const std::string& domain) {
+  SETUP_THREAD_CONTEXT(env_);
+
+  JsValue func(isolate, env_->Evaluate("API.getElementHidingSelectors"));
+  CallParams params;
+  params.emplace_back(v8::String::NewFromUtf8(isolate, domain.c_str()));
+
+  auto array = v8::Local<v8::Array>::Cast<v8::Value>(func.Call(params));
+  std::vector<std::string> selectors(array->Length());
+  for (uint32_t idx = 0; idx < array->Length(); ++idx) {
+    selectors[idx] = V8_STRING_TO_STD_STRING(array->Get(idx)->ToString());
+  }
+  return selectors;
 }
 
 }  // namespace adblock

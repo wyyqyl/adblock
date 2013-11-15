@@ -18,6 +18,12 @@ inline v8::Local<v8::String> STD_STRING_TO_V8_STRING(v8::Isolate* isolate,
 }
 #define STD_STRING_TO_V8_STRING adblock::utils::STD_STRING_TO_V8_STRING
 
+#define SETUP_THREAD_CONTEXT(env)                                             \
+  v8::Isolate* isolate = env->isolate();                                      \
+  v8::Locker locker(isolate);                                                 \
+  v8::HandleScope handle_scope(isolate);                                      \
+  v8::Context::Scope context_scope(env->context())
+
 }  // namespace utils
 }  // namespace adblock
 
