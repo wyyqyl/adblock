@@ -3,6 +3,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <vld.h>
+#include <ctime>
 
 int main() {
   try {
@@ -11,9 +12,11 @@ int main() {
     if (!adblock) {
       return -1;
     }
-    adblock::FilterPtr filter = adblock->CheckFilterMatch("http://pagead2.googlesyndication.com/pagead/show_ads.js", "SCRIPT", "http://bbs.pediy.com/");
-    adblock::Filter::Type type = filter->type();
-    bool collapse = filter->collapse();
+
+    time_t timer = time(nullptr);
+    adblock->CheckFilterMatch("http://pagead2.googlesyndication.com/pagead/show_ads.js", "SCRIPT", "http://bbs.pediy.com/");
+    adblock->GetElementHidingSelectors("http://reddit.com/");
+    std::cout << "Time elapsed: " << difftime(time(nullptr), timer) << std::endl;
   } catch (const std::exception& e) {
     OutputDebugStringA(e.what());
     std::cerr << e.what() << std::endl;

@@ -15,10 +15,10 @@ class AdBlockImpl : public AdBlock {
 
   bool Init();
 
-  FilterPtr CheckFilterMatch(const std::string& location,
-                             const std::string& type,
-                             const std::string& document);
-  std::vector<std::string> GetElementHidingSelectors(const std::string& domain);
+  std::string CheckFilterMatch(const std::string& location,
+                               const std::string& type,
+                               const std::string& document);
+  std::string GetElementHidingSelectors(const std::string& domain);
 
  private:
   Environment* env_;
