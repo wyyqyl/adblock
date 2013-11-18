@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "AnviAdblock",
+  "version": "1.0.0.0",
+
+  "description": "AnviAdblock Plugin",
+
+  "permissions": [
+    "https://*/*",
+    "http://*//*",
+    "file:///*",
+    "webRequest",
+    "webRequestBlocking"
+  ],
+
+   "content_scripts": [ {
+      "all_frames": true,
+      "js": [ "preload.js" ],
+      "matches": [ "http://*/*", "https://*/*" ],
+      "run_at": "document_start"
+   } ],
+  
+  "background": {
+    "page": "background.html"
+  }
+}
