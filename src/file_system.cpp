@@ -3,6 +3,9 @@
 #include <sstream>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
+#ifdef WIN32
+#include <Windows.h>
+#endif  // WIN32
 
 namespace adblock {
 
@@ -56,7 +59,26 @@ FileSystem::StatResult DefaultFileSystem::Stat(const std::string& path) const {
 }
 
 std::string DefaultFileSystem::Resolve(const std::string& path) const {
-  return fs::absolute(path).string();
+  fs::path dir(fs::current_path());
+
+#ifdef WIN32
+  HKEY hkey = nullptr;
+  char value[MAX_PATH] = { 0 };
+  DWORD length = MAX_PATH;
+  LONG status = RegOpenKeyExA(HKEY_CURRENT_USER, 
+      "Software\\MozillaPlugins\\anvisoft.com/AdblockPlugin",
+      0, KEY_READ, &hkey);
+  if (status == ERROR_SUCCESS) {
+    status = RegQueryValueExA(hkey, "Path", NULL, NULL, (LPBYTE)value, &length);
+    RegCloseKey(hkey);
+    if (status == ERROR_SUCCESS) {
+      dir = std::string(value, length);
+      dir = dir.parent_path();
+    }
+  }
+#endif  // WIN32
+
+  return fs::absolute(path, dir).string();
 }
 
 }  // namespace adblock
