@@ -29,16 +29,16 @@ void DispatchDebugMessages() {
   v8::Isolate* isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);
   v8::Local<v8::Context> context =
-    v8::Local<v8::Context>::New(isolate, debug_message_context);
+      v8::Local<v8::Context>::New(isolate, debug_message_context);
   v8::Context::Scope scope(context);
 
   v8::Debug::ProcessDebugMessages();
 }
 #endif  // ENABLE_DEBUGGER_SUPPORT
 
-void CreateInstance(AdBlockPtr *adblock) {
+void CreateInstance(AdBlockPtr* adblock) {
   *adblock = nullptr;
-  AdBlockImpl *result = new AdBlockImpl();
+  AdBlockImpl* result = new AdBlockImpl();
   if (result->Init()) {
     *adblock = AdBlockPtr(result);
   } else {
@@ -47,10 +47,7 @@ void CreateInstance(AdBlockPtr *adblock) {
 }
 
 AdBlockImpl::AdBlockImpl()
-    : is_first_run_(false),
-      initialized_(false),
-      collapse_(true) {
-}
+    : is_first_run_(false), initialized_(false), collapse_(true) {}
 
 AdBlockImpl::~AdBlockImpl() {
   if (env_ != nullptr) {
@@ -88,7 +85,8 @@ bool AdBlockImpl::Init() {
     auto fun_name = v8::String::NewFromUtf8(isolate, "initAdblock");
     auto process_val = context->Global()->Get(fun_name);
     JsValue(isolate, process_val).Call();
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
     return false;
   }
@@ -106,8 +104,8 @@ void AdBlockImpl::InitDone(const JsValueList& args) {
 }
 
 std::string AdBlockImpl::CheckFilterMatch(const std::string& location,
-                                        const std::string& type,
-                                        const std::string& document) {
+                                          const std::string& type,
+                                          const std::string& document) {
   SETUP_THREAD_CONTEXT(env_);
 
   JsValue func(isolate, env_->Evaluate("API.checkFilterMatch"));
@@ -129,6 +127,15 @@ std::string AdBlockImpl::GetElementHidingSelectors(const std::string& domain) {
 
   return V8_STRING_TO_STD_STRING(
       v8::Local<v8::String>::Cast<v8::Value>(func.Call(params)));
+}
+
+void AdBlockImpl::AddSubscription(const std::string& url) {
+  SETUP_THREAD_CONTEXT(env_);
+
+  JsValue func(isolate, env_->Evaluate("API.addSubscription"));
+  CallParams params;
+  params.emplace_back(v8::String::NewFromUtf8(isolate, url.c_str()));
+  func.Call(params);
 }
 
 }  // namespace adblock

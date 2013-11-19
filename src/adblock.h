@@ -13,11 +13,12 @@ class AdBlock {
                                        const std::string& type,
                                        const std::string& document) = 0;
   virtual std::string GetElementHidingSelectors(const std::string& domain) = 0;
+  virtual void AddSubscription(const std::string& url) = 0;
 };
 
 typedef boost::shared_ptr<AdBlock> AdBlockPtr;
 
-void CreateInstance(AdBlockPtr *adblock);
+void CreateInstance(AdBlockPtr* adblock);
 
 }  // namespace adblock
 
