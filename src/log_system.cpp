@@ -2,8 +2,7 @@
 
 namespace adblock {
 
-void DefaultLogSystem::operator()(LogLevel level,
-                                  const std::string& message,
+void DefaultLogSystem::operator()(LogLevel level, const std::string& message,
                                   const std::string& source) {
   boost::mutex::scoped_lock lock(mutex_);
 
@@ -29,4 +28,3 @@ void DefaultLogSystem::operator()(LogLevel level,
 }
 
 }  // namespace adblock
-

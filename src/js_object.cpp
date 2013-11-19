@@ -8,8 +8,7 @@ namespace js_object {
 
 // Used to be a macro, hence the uppercase name.
 template <typename T>
-inline void ADB_SET_METHOD(const T& recv,
-                           const char* name,
+inline void ADB_SET_METHOD(const T& recv, const char* name,
                            v8::FunctionCallback callback) {
   v8::Isolate* isolate = v8::Isolate::GetCurrent();
   v8::HandleScope handle_scope(isolate);
@@ -20,17 +19,16 @@ inline void ADB_SET_METHOD(const T& recv,
 
 // Used to be a macro, hence the uppercase name.
 template <typename T>
-inline void ADB_SET_OBJECT(const T& recv,
-                           const char* name,
+inline void ADB_SET_OBJECT(const T& recv, const char* name,
                            const v8::Local<v8::Object>& obj) {
   recv->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name), obj);
 }
 #define ADB_SET_OBJECT adblock::js_object::ADB_SET_OBJECT
 
-#define ADB_THROW_EXCEPTION(isolate, str)                                     \
-  do {                                                                        \
-    (isolate)->ThrowException(v8::String::NewFromUtf8((isolate), (str)));     \
-    return;                                                                   \
+#define ADB_THROW_EXCEPTION(isolate, str)                                 \
+  do {                                                                    \
+    (isolate)->ThrowException(v8::String::NewFromUtf8((isolate), (str))); \
+    return;                                                               \
   } while (0)
 
 boost::thread* TimeoutThread::Start() {
@@ -45,14 +43,16 @@ void TimeoutThread::Run(boost::thread* thread) {
   try {
     boost::this_thread::sleep(boost::posix_time::milliseconds(delay_));
     func_->Call(args_, env_);
-  } catch (const boost::thread_interrupted&) {
+  }
+  catch (const boost::thread_interrupted&) {
     // If the function is interrupted, we DO NOT remove the thread from
     // ThreadGroup or delete the thread. Otherwise, Thread::join() will throw
     // exception, reporting that the thread is not joinable for the thread
     // is deleted by us.
     delete this;
     return;
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     // func_->Call(args_, env_) throws error
     std::cerr << e.what() << std::endl;
   }
@@ -116,12 +116,12 @@ void TriggerCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
 void Setup(Environment* env) {
   auto global = env->context()->Global();
-  ADB_SET_METHOD(global, "setTimeout",    SetTimeoutCallback);
-  ADB_SET_METHOD(global, "clearTimeout",  ClearTimeoutCallback);
-  ADB_SET_METHOD(global, "trigger",       TriggerCallback);
-  ADB_SET_OBJECT(global, "fileSystem",    file_system_object::Setup(env));
-  ADB_SET_OBJECT(global, "webRequest",    web_request_object::Setup(env));
-  ADB_SET_OBJECT(global, "console",       console_object::Setup(env));
+  ADB_SET_METHOD(global, "setTimeout", SetTimeoutCallback);
+  ADB_SET_METHOD(global, "clearTimeout", ClearTimeoutCallback);
+  ADB_SET_METHOD(global, "trigger", TriggerCallback);
+  ADB_SET_OBJECT(global, "fileSystem", file_system_object::Setup(env));
+  ADB_SET_OBJECT(global, "webRequest", web_request_object::Setup(env));
+  ADB_SET_OBJECT(global, "console", console_object::Setup(env));
 }
 
 namespace file_system_object {
@@ -132,7 +132,8 @@ void ReadThread::Run() {
 
   try {
     content = file_system_->Read(path_);
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     error = e.what();
   }
 
@@ -148,7 +149,8 @@ void ReadThread::Run() {
   params.push_back(result);
   try {
     callback_->Call(params);
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
 
@@ -160,7 +162,8 @@ void WriteThread::Run() {
 
   try {
     file_system_->Write(path_, data_);
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     error = e.what();
   }
 
@@ -171,7 +174,8 @@ void WriteThread::Run() {
   params.push_back(result);
   try {
     callback_->Call(params);
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
 
@@ -184,7 +188,8 @@ void RemoveThread::Run() {
 
   try {
     removed = file_system_->Remove(path_);
-  } catch (const boost::filesystem::filesystem_error& e) {
+  }
+  catch (const boost::filesystem::filesystem_error& e) {
     error = e.what();
   }
 
@@ -199,7 +204,8 @@ void RemoveThread::Run() {
   params.push_back(result);
   try {
     callback_->Call(params);
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
 
@@ -211,7 +217,8 @@ void MoveThread::Run() {
 
   try {
     file_system_->Move(from_, to_);
-  } catch (const boost::filesystem::filesystem_error& e) {
+  }
+  catch (const boost::filesystem::filesystem_error& e) {
     error = e.what();
   }
 
@@ -222,7 +229,8 @@ void MoveThread::Run() {
   params.push_back(result);
   try {
     callback_->Call(params);
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
 
@@ -235,7 +243,8 @@ void StatThread::Run() {
 
   try {
     stat_result = file_system_->Stat(path_);
-  } catch (const boost::filesystem::filesystem_error& e) {
+  }
+  catch (const boost::filesystem::filesystem_error& e) {
     error = e.what();
   }
 
@@ -248,7 +257,8 @@ void StatThread::Run() {
               v8::Boolean::New(stat_result.is_file));
   result->Set(STD_STRING_TO_V8_STRING(isolate, "isDirectory"),
               v8::Boolean::New(stat_result.is_directory));
-  result->Set(STD_STRING_TO_V8_STRING(isolate, "lastWriteTime"),
+  result->Set(
+      STD_STRING_TO_V8_STRING(isolate, "lastWriteTime"),
       v8::Number::New(static_cast<double>(stat_result.last_write_time)));
   result->Set(STD_STRING_TO_V8_STRING(isolate, "error"),
               STD_STRING_TO_V8_STRING(isolate, error));
@@ -257,7 +267,8 @@ void StatThread::Run() {
   params.push_back(result);
   try {
     callback_->Call(params);
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
 
@@ -270,8 +281,8 @@ void ReadCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ADB_THROW_EXCEPTION(isolate, "fileSystem.read requires 2 parameters");
   }
   if (!args[1]->IsFunction()) {
-    ADB_THROW_EXCEPTION(isolate,
-        "Second argument to fileSystem.read must be a function");
+    ADB_THROW_EXCEPTION(
+        isolate, "Second argument to fileSystem.read must be a function");
   }
 
   Thread* thread = new ReadThread(args);
@@ -284,8 +295,8 @@ void WriteCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ADB_THROW_EXCEPTION(isolate, "fileSystem.write requires 3 parameters");
   }
   if (!args[2]->IsFunction()) {
-    ADB_THROW_EXCEPTION(isolate,
-        "Third argument to fileSystem.write must be a function");
+    ADB_THROW_EXCEPTION(
+        isolate, "Third argument to fileSystem.write must be a function");
   }
 
   Thread* thread = new WriteThread(args);
@@ -298,8 +309,8 @@ void RemoveCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ADB_THROW_EXCEPTION(isolate, "fileSystem.remove requires 2 parameters");
   }
   if (!args[1]->IsFunction()) {
-    ADB_THROW_EXCEPTION(isolate,
-        "Second argument to fileSystem.remove must be a function");
+    ADB_THROW_EXCEPTION(
+        isolate, "Second argument to fileSystem.remove must be a function");
   }
 
   Thread* thread = new RemoveThread(args);
@@ -326,8 +337,8 @@ void StatCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ADB_THROW_EXCEPTION(isolate, "fileSystem.stat requires 2 parameters");
   }
   if (!args[1]->IsFunction()) {
-    ADB_THROW_EXCEPTION(isolate,
-        "Second argument to fileSystem.stat must be a function");
+    ADB_THROW_EXCEPTION(
+        isolate, "Second argument to fileSystem.stat must be a function");
   }
 
   Thread* thread = new StatThread(args);
@@ -349,12 +360,12 @@ void ResolveCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
 v8::Local<v8::Object> Setup(Environment* env) {
   v8::EscapableHandleScope handle_scope(env->isolate());
   auto obj = v8::Object::New();
-  ADB_SET_METHOD(obj, "read",     ReadCallback);
-  ADB_SET_METHOD(obj, "write",    WriteCallback);
-  ADB_SET_METHOD(obj, "remove",   RemoveCallback);
-  ADB_SET_METHOD(obj, "move",     MoveCallback);
-  ADB_SET_METHOD(obj, "stat",     StatCallback);
-  ADB_SET_METHOD(obj, "resolve",  ResolveCallback);
+  ADB_SET_METHOD(obj, "read", ReadCallback);
+  ADB_SET_METHOD(obj, "write", WriteCallback);
+  ADB_SET_METHOD(obj, "remove", RemoveCallback);
+  ADB_SET_METHOD(obj, "move", MoveCallback);
+  ADB_SET_METHOD(obj, "stat", StatCallback);
+  ADB_SET_METHOD(obj, "resolve", ResolveCallback);
   return handle_scope.Escape(obj);
 }
 
@@ -387,7 +398,8 @@ void WebRequestThread::Run() {
   params.push_back(result);
   try {
     callback_->Call(params);
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
 
@@ -483,11 +495,11 @@ void TraceCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
 v8::Local<v8::Object> Setup(Environment* env) {
   v8::EscapableHandleScope handle_scope(env->isolate());
   auto obj = v8::Object::New();
-  ADB_SET_METHOD(obj, "log",    LogCallback);
-  ADB_SET_METHOD(obj, "info",   InfoCallback);
-  ADB_SET_METHOD(obj, "warn",   WarnCallback);
-  ADB_SET_METHOD(obj, "error",  ErrorCallback);
-  ADB_SET_METHOD(obj, "trace",  TraceCallback);
+  ADB_SET_METHOD(obj, "log", LogCallback);
+  ADB_SET_METHOD(obj, "info", InfoCallback);
+  ADB_SET_METHOD(obj, "warn", WarnCallback);
+  ADB_SET_METHOD(obj, "error", ErrorCallback);
+  ADB_SET_METHOD(obj, "trace", TraceCallback);
   return handle_scope.Escape(obj);
 }
 

@@ -9,8 +9,7 @@ namespace adblock {
 class Thread {
  public:
   explicit Thread(v8::Isolate* isolate)
-      : env_(Environment::GetCurrent(isolate)) {
-  }
+      : env_(Environment::GetCurrent(isolate)) {}
   virtual ~Thread() {}
 
   virtual boost::thread* Start() {
@@ -29,8 +28,7 @@ class Thread {
 namespace js_object {
 
 inline JsValueList CONVERT_ARGUMENTS(
-    const v8::FunctionCallbackInfo<v8::Value>& args,
-    int start = 0,
+    const v8::FunctionCallbackInfo<v8::Value>& args, int start = 0,
     int end = -1) {
   JsValueList arguments;
   if (start >= args.Length()) {
@@ -52,8 +50,7 @@ class TimeoutThread : public Thread {
       : Thread(args.GetIsolate()),
         delay_(args[1]->Int32Value()),
         func_(new JsValue(args.GetIsolate(), args[0])),
-        args_(CONVERT_ARGUMENTS(args, 2)) {
-  }
+        args_(CONVERT_ARGUMENTS(args, 2)) {}
 
   boost::thread* Start();
 
@@ -75,8 +72,7 @@ class IoThread : public Thread {
   IoThread(v8::Isolate* isolate, const v8::Handle<v8::Value>& value)
       : Thread(isolate),
         file_system_(env_->GetFileSystem()),
-        callback_(new JsValue(isolate, value)) {
-  }
+        callback_(new JsValue(isolate, value)) {}
 
  protected:
   FileSystemPtr file_system_;
@@ -87,8 +83,7 @@ class ReadThread : public IoThread {
  public:
   explicit ReadThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : IoThread(args.GetIsolate(), args[1]),
-        path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
-  }
+        path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {}
 
  private:
   std::string path_;
@@ -101,8 +96,7 @@ class WriteThread : public IoThread {
   explicit WriteThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : IoThread(args.GetIsolate(), args[2]),
         path_(V8_STRING_TO_STD_STRING(args[0]->ToString())),
-        data_(V8_STRING_TO_STD_STRING(args[1]->ToString())) {
-  }
+        data_(V8_STRING_TO_STD_STRING(args[1]->ToString())) {}
 
  private:
   std::string path_;
@@ -115,8 +109,7 @@ class RemoveThread : public IoThread {
  public:
   explicit RemoveThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : IoThread(args.GetIsolate(), args[1]),
-        path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
-  }
+        path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {}
 
  private:
   std::string path_;
@@ -129,8 +122,7 @@ class MoveThread : public IoThread {
   explicit MoveThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : IoThread(args.GetIsolate(), args[2]),
         from_(V8_STRING_TO_STD_STRING(args[0]->ToString())),
-        to_(V8_STRING_TO_STD_STRING(args[1]->ToString())) {
-  }
+        to_(V8_STRING_TO_STD_STRING(args[1]->ToString())) {}
 
  private:
   std::string from_;
@@ -143,8 +135,7 @@ class StatThread : public IoThread {
  public:
   explicit StatThread(const v8::FunctionCallbackInfo<v8::Value>& args)
       : IoThread(args.GetIsolate(), args[1]),
-        path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {
-  }
+        path_(V8_STRING_TO_STD_STRING(args[0]->ToString())) {}
 
  private:
   std::string path_;

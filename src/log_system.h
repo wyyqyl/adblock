@@ -18,8 +18,7 @@ class LogSystem {
   };
 
   virtual ~LogSystem() {}
-  virtual void operator()(LogLevel level,
-                          const std::string& message,
+  virtual void operator()(LogLevel level, const std::string& message,
                           const std::string& source) = 0;
 
  protected:
@@ -30,8 +29,7 @@ typedef boost::shared_ptr<LogSystem> LogSystemPtr;
 
 class DefaultLogSystem : public LogSystem {
  public:
-  void operator()(LogLevel level,
-                  const std::string& message,
+  void operator()(LogLevel level, const std::string& message,
                   const std::string& source);
 };
 

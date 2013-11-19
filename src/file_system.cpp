@@ -12,16 +12,13 @@ namespace adblock {
 class RuntimeErrorWithErrno : public std::runtime_error {
  public:
   explicit RuntimeErrorWithErrno(const std::string& message)
-      : std::runtime_error(message + " (" + std::strerror(errno) + ")") {
-  }
+      : std::runtime_error(message + " (" + std::strerror(errno) + ")") {}
 };
 
 namespace fs = boost::filesystem;
 
 #ifdef _MSC_VER
-DefaultFileSystem::DefaultFileSystem() {
-  fs::path::imbue(std::locale(""));
-}
+DefaultFileSystem::DefaultFileSystem() { fs::path::imbue(std::locale("")); }
 #endif  // _MSC_VER
 
 std::string DefaultFileSystem::Read(const std::string& path) const {
@@ -63,10 +60,10 @@ std::string DefaultFileSystem::Resolve(const std::string& path) const {
 
 #ifdef WIN32
   HKEY hkey = nullptr;
-  char value[MAX_PATH] = { 0 };
+  char value[MAX_PATH] = {0};
   DWORD length = MAX_PATH;
-  LONG status = RegOpenKeyExA(HKEY_CURRENT_USER, 
-      "Software\\MozillaPlugins\\anvisoft.com/AdblockPlugin",
+  LONG status = RegOpenKeyExA(
+      HKEY_CURRENT_USER, "Software\\MozillaPlugins\\anvisoft.com/AdblockPlugin",
       0, KEY_READ, &hkey);
   if (status == ERROR_SUCCESS) {
     status = RegQueryValueExA(hkey, "Path", NULL, NULL, (LPBYTE)value, &length);

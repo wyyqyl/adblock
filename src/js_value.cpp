@@ -5,8 +5,7 @@
 namespace adblock {
 
 JsValue::JsValue(v8::Isolate* isolate, const v8::Handle<v8::Value>& value)
-    : value_(isolate, value) {
-}
+    : value_(isolate, value) {}
 
 v8::Local<v8::Value> JsValue::Call(const JsValueList& args, Environment* env) {
   if (!value_->IsFunction()) {
@@ -26,7 +25,7 @@ v8::Local<v8::Value> JsValue::Call(const JsValueList& args, Environment* env) {
 }
 
 v8::Local<v8::Value> JsValue::Call(const CallParams& args /*= CallParams()*/,
-                         Environment* env /*= nullptr*/) {
+                                   Environment* env /*= nullptr*/) {
   if (!value_->IsFunction()) {
     throw std::invalid_argument("Attempting to call a non-function");
   }
@@ -43,8 +42,10 @@ v8::Local<v8::Value> JsValue::Call(const CallParams& args /*= CallParams()*/,
 
   v8::TryCatch try_catch;
   auto func = v8::Handle<v8::Function>::Cast<v8::Value>(value_);
-  auto result = func->Call(obj, args.size(), args.size() ?
-      const_cast<v8::Handle<v8::Value>*>(&args.front()) : nullptr);
+  auto result =
+      func->Call(obj, args.size(),
+                 args.size() ? const_cast<v8::Handle<v8::Value>*>(&args.front())
+                             : nullptr);
 
   if (try_catch.HasCaught()) {
     throw JsError(isolate, &try_catch);

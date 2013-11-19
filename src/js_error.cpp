@@ -21,8 +21,8 @@ std::string ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch) {
 
   // Print (filename):(line number): (message).
   v8::String::Utf8Value filename(message->GetScriptResourceName());
-  error << *filename << ":" << message->GetLineNumber()
-      << ": " << *exception << "\n";
+  error << *filename << ":" << message->GetLineNumber() << ": " << *exception
+        << "\n";
 
   // Print line of source code.
   v8::String::Utf8Value sourceline(message->GetSourceLine());
@@ -52,7 +52,6 @@ std::string ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch) {
 namespace adblock {
 
 JsError::JsError(v8::Isolate* isolate, v8::TryCatch* try_catch)
-    : std::runtime_error(ReportException(isolate, try_catch)) {
-  }
+    : std::runtime_error(ReportException(isolate, try_catch)) {}
 
 }  // namespace adblock

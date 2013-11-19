@@ -26,8 +26,7 @@ Environment::Environment(const v8::Local<v8::Context>& context)
 }
 
 Environment::~Environment() {
-  context_->SetAlignedPointerInEmbedderData(kContextEmbedderDataIndex,
-                                            nullptr);
+  context_->SetAlignedPointerInEmbedderData(kContextEmbedderDataIndex, nullptr);
   for (auto it = timeout_threads_.begin(); it != timeout_threads_.end(); ++it) {
     (*it)->interrupt();
     (*it)->join();
@@ -68,16 +67,13 @@ void Environment::TriggerEvent(const std::string& name,
   }
 }
 
-v8::Isolate* Environment::isolate() const {
-  return isolate_;
-}
+v8::Isolate* Environment::isolate() const { return isolate_; }
 
-v8::Local<v8::Context> Environment::context() const {
-  return context_;
-}
+v8::Local<v8::Context> Environment::context() const { return context_; }
 
-v8::Local<v8::Value> Environment::Evaluate(const std::string& source,
-    const std::string& file_name/*= std::string()*/) {
+v8::Local<v8::Value> Environment::Evaluate(
+    const std::string& source,
+    const std::string& file_name /*= std::string()*/) {
   v8::EscapableHandleScope handle_scope(isolate_);
   v8::TryCatch try_catch;
   auto script = CompileScript(isolate_, source, file_name);
@@ -91,9 +87,7 @@ v8::Local<v8::Value> Environment::Evaluate(const std::string& source,
   return handle_scope.Escape(result);
 }
 
-void Environment::Dispose() {
-  delete this;
-}
+void Environment::Dispose() { delete this; }
 
 void Environment::SetFileSystem(FileSystemPtr file_system) {
   if (!file_system) {

@@ -22,15 +22,9 @@ class JsValue {
   v8::Local<v8::Value> Call(const CallParams& args = CallParams(),
                             Environment* env = nullptr);
 
-  inline v8::Local<v8::Value> ToV8Value() const {
-    return value_;
-  }
-  inline bool BooleanValue() const {
-    return value_->BooleanValue();
-  }
-  inline bool IsObject() const {
-    return value_->IsObject();
-  }
+  inline v8::Local<v8::Value> ToV8Value() const { return value_; }
+  inline bool BooleanValue() const { return value_->BooleanValue(); }
+  inline bool IsObject() const { return value_->IsObject(); }
 
  private:
   JsData<v8::Value> value_;

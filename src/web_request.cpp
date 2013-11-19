@@ -62,11 +62,10 @@ size_t ReceiveHeader(char* ptr, size_t size, size_t nmemb, void* userdata) {
     const std::string prefix("HTTP/1.");
     size_t prefix_len = prefix.length();
     if (header.length() >= prefix_len + 2 &&
-        !header.compare(0, prefix_len, prefix) &&
-        isdigit(header[prefix_len]) && isspace(header[prefix_len + 1])) {
+        !header.compare(0, prefix_len, prefix) && isdigit(header[prefix_len]) &&
+        isspace(header[prefix_len + 1])) {
       size_t status_start = prefix_len + 2;
-      while (status_start < header.length() &&
-             isspace(header[status_start])) {
+      while (status_start < header.length() && isspace(header[status_start])) {
         ++status_start;
       }
 
@@ -77,8 +76,9 @@ size_t ReceiveHeader(char* ptr, size_t size, size_t nmemb, void* userdata) {
 
       if (status_end > status_start && status_end < header.length() &&
           isspace(header[status_end])) {
-        std::istringstream(header.substr(
-          status_start, status_end - status_start)) >> data->status;
+        std::istringstream(
+            header.substr(status_start, status_end - status_start)) >>
+            data->status;
         data->headers.clear();
         data->expected_status = false;
       }
@@ -103,8 +103,7 @@ size_t ReceiveHeader(char* ptr, size_t size, size_t nmemb, void* userdata) {
 namespace adblock {
 
 WebRequest::ServerResponse DefaultWebRequest::Get(
-    const std::string& url,
-    const HeaderList& headers) const {
+    const std::string& url, const HeaderList& headers) const {
   ServerResponse result;
   result.status = NS_ERROR_NOT_INITIALIZED;
   result.response_status = 0;
@@ -125,8 +124,8 @@ WebRequest::ServerResponse DefaultWebRequest::Get(
 
   struct curl_slist* header_list = nullptr;
   for (auto it = headers.begin(); it != headers.end(); ++it) {
-    header_list = curl_slist_append(header_list,
-                                    (it->first + ": " + it->second).c_str());
+    header_list =
+        curl_slist_append(header_list, (it->first + ": " + it->second).c_str());
   }
   if (header_list) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
@@ -135,8 +134,8 @@ WebRequest::ServerResponse DefaultWebRequest::Get(
   result.status = ConvertErrorCode(curl_easy_perform(curl));
   result.response_status = header_data.status;
   result.response_text = response_text.str();
-  for (auto it = header_data.headers.begin();
-       it != header_data.headers.end(); ++it) {
+  for (auto it = header_data.headers.begin(); it != header_data.headers.end();
+       ++it) {
     // Parse header name and value out of something like "Foo: bar"
     std::string header = *it;
     size_t colon_pos = header.find(':');

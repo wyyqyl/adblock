@@ -52,9 +52,7 @@ class Environment {
   void SetWebRequest(WebRequestPtr web_reqeust);
   WebRequestPtr GetWebRequest();
 
-  inline ThreadGroup& GetTimeoutThreads() {
-    return timeout_threads_;
-  }
+  inline ThreadGroup& GetTimeoutThreads() { return timeout_threads_; }
 
  private:
   explicit Environment(const v8::Local<v8::Context>& context);
