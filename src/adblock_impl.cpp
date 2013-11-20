@@ -1,6 +1,10 @@
 #include "adblock_impl.h"
 #include "js_object.h"
 
+#ifdef WIN32
+#include <Windows.h>
+#endif  // WIN32
+
 #ifdef ENABLE_DEBUGGER_SUPPORT
 #include <v8/v8-debug.h>
 #endif  // ENABLE_DEBUGGER_SUPPORT
@@ -87,6 +91,9 @@ bool AdBlockImpl::Init() {
     JsValue(isolate, process_val).Call();
   }
   catch (const std::exception& e) {
+#ifdef WIN32
+    OutputDebugStringA(e.what());
+#endif  // WIN32
     std::cerr << e.what() << std::endl;
     return false;
   }

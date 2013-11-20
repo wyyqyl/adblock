@@ -1,30 +1,39 @@
 #include "log_system.h"
+#include <sstream>
+#ifdef WIN32
+#include <Windows.h>
+#endif  // WIN32
 
 namespace adblock {
 
 void DefaultLogSystem::operator()(LogLevel level, const std::string& message,
                                   const std::string& source) {
   boost::mutex::scoped_lock lock(mutex_);
+  std::stringstream log;
 
-  std::cerr << source;
+  log << source;
   switch (level) {
     case LOG_LEVEL_TRACE:
-      std::cerr << "Traceback:" << std::endl;
+      log << "Traceback:" << std::endl;
       break;
     case LOG_LEVEL_LOG:
-      std::cerr << " ";
+      log << " ";
       break;
     case LOG_LEVEL_INFO:
-      std::cerr << "[Info] ";
+      log << "[Info] ";
       break;
     case LOG_LEVEL_WARN:
-      std::cerr << "[Warning] ";
+      log << "[Warning] ";
       break;
     case LOG_LEVEL_ERROR:
-      std::cerr << "[Error] ";
+      log << "[Error] ";
       break;
   }
-  std::cerr << message << std::endl;
+  log << message << std::endl;
+#ifdef WIN32
+  OutputDebugStringA(log.str().c_str());
+#endif  // WIN32
+  std::cerr << log.str();
 }
 
 }  // namespace adblock

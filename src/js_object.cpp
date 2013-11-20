@@ -3,6 +3,10 @@
 
 #include <boost/filesystem/operations.hpp>
 
+#ifdef WIN32
+#include <Windows.h>
+#endif  // WIN32
+
 namespace adblock {
 namespace js_object {
 
@@ -53,7 +57,10 @@ void TimeoutThread::Run(boost::thread* thread) {
     return;
   }
   catch (const std::exception& e) {
-    // func_->Call(args_, env_) throws error
+// func_->Call(args_, env_) throws error
+#ifdef WIN32
+    OutputDebugStringA(e.what());
+#endif  // WIN32
     std::cerr << e.what() << std::endl;
   }
 
@@ -151,6 +158,9 @@ void ReadThread::Run() {
     callback_->Call(params);
   }
   catch (const std::exception& e) {
+#ifdef WIN32
+    OutputDebugStringA(e.what());
+#endif  // WIN32
     std::cerr << e.what() << std::endl;
   }
 
@@ -176,6 +186,9 @@ void WriteThread::Run() {
     callback_->Call(params);
   }
   catch (const std::exception& e) {
+#ifdef WIN32
+    OutputDebugStringA(e.what());
+#endif  // WIN32
     std::cerr << e.what() << std::endl;
   }
 
@@ -206,6 +219,9 @@ void RemoveThread::Run() {
     callback_->Call(params);
   }
   catch (const std::exception& e) {
+#ifdef WIN32
+    OutputDebugStringA(e.what());
+#endif  // WIN32
     std::cerr << e.what() << std::endl;
   }
 
@@ -231,6 +247,9 @@ void MoveThread::Run() {
     callback_->Call(params);
   }
   catch (const std::exception& e) {
+#ifdef WIN32
+    OutputDebugStringA(e.what());
+#endif  // WIN32
     std::cerr << e.what() << std::endl;
   }
 
@@ -269,6 +288,9 @@ void StatThread::Run() {
     callback_->Call(params);
   }
   catch (const std::exception& e) {
+#ifdef WIN32
+    OutputDebugStringA(e.what());
+#endif  // WIN32
     std::cerr << e.what() << std::endl;
   }
 
@@ -400,6 +422,9 @@ void WebRequestThread::Run() {
     callback_->Call(params);
   }
   catch (const std::exception& e) {
+#ifdef WIN32
+    OutputDebugStringA(e.what());
+#endif  // WIN32
     std::cerr << e.what() << std::endl;
   }
 
