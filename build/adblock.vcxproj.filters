@@ -82,9 +82,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\tools\cpplint.py">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\tools\js2c.py">
       <Filter>Resource Files</Filter>
     </CustomBuild>
