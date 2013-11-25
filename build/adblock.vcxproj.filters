@@ -108,9 +108,6 @@
     <None Include="..\lib\info.js">
       <Filter>Resource Files\lib</Filter>
     </None>
-    <None Include="..\lib\updater.js">
-      <Filter>Resource Files\lib</Filter>
-    </None>
     <None Include="..\lib\init.js">
       <Filter>Resource Files\lib</Filter>
     </None>

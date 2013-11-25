@@ -59,7 +59,6 @@
     <None Include="..\lib\prefs.js" />
     <None Include="..\lib\subscriptionClasses.js" />
     <None Include="..\lib\synchronizer.js" />
-    <None Include="..\lib\updater.js" />
     <None Include="..\lib\utils.js" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
