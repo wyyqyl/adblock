@@ -13,12 +13,7 @@ var API = (function() {
 
   return {
     checkFilterMatch: function(url, type, documentUrl) {
-      var result = JSON.parse(plugin.checkFilterMatch(url, type, documentUrl));
-      if (result === null) {
-        result = {};
-        result.type = FilterType.NO_MATCH;
-      }
-      return result;
+      return JSON.parse(plugin.checkFilterMatch(url, type, documentUrl));
     },
 
     getElementHidingSelectors: function(domain) {
