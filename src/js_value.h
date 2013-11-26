@@ -5,6 +5,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <string>
 
 namespace adblock {
 
@@ -25,6 +26,7 @@ class JsValue {
   inline v8::Local<v8::Value> ToV8Value() const { return value_; }
   inline bool BooleanValue() const { return value_->BooleanValue(); }
   inline bool IsObject() const { return value_->IsObject(); }
+  std::string ToStdString() const;
 
  private:
   JsData<v8::Value> value_;

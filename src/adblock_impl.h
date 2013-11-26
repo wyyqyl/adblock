@@ -29,6 +29,7 @@ class AdBlockImpl : public AdBlock {
   bool collapse_;
 
   void InitDone(const JsValueList& args);
+  void BlockingHit(const JsValueList& args);
 };
 
 }  // namespace adblock

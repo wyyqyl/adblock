@@ -3,6 +3,7 @@
 
 #ifdef WIN32
 #include <Windows.h>
+#include <sstream>
 #endif  // WIN32
 
 #ifdef ENABLE_DEBUGGER_SUPPORT
@@ -75,6 +76,8 @@ bool AdBlockImpl::Init() {
 
     env_->SetEventCallback("init",
                            boost::bind(&AdBlockImpl::InitDone, this, _1));
+    env_->SetEventCallback("BlockingHit",
+                           boost::bind(&AdBlockImpl::BlockingHit, this, _1));
 #ifdef ENABLE_DEBUGGER_SUPPORT
     debug_message_context.Reset(isolate, context);
     v8::Debug::SetDebugMessageDispatchHandler(DispatchDebugMessages, true);
@@ -108,6 +111,20 @@ void AdBlockImpl::InitDone(const JsValueList& args) {
   env_->RemoveEventCallback("init");
   is_first_run_ = args.size() && args.front()->BooleanValue();
   initialized_ = true;
+}
+
+void AdBlockImpl::BlockingHit(const JsValueList& args) {
+  if (args.size() < 4) {
+    throw std::invalid_argument("BlockingHit requires 4 parameters");
+  }
+  std::string time(args[0]->ToStdString());
+  std::string website(args[1]->ToStdString());
+  std::string location(args[2]->ToStdString());
+  std::string rule(args[3]->ToStdString());
+#ifdef WIN32
+  std::string detail = time + " " + website + " " + location + " " + rule;
+  OutputDebugStringA(detail.c_str());
+#endif  // WIN32
 }
 
 std::string AdBlockImpl::CheckFilterMatch(const std::string& location,

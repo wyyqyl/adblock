@@ -1,6 +1,7 @@
 #include "js_value.h"
 #include "env.h"
 #include "js_error.h"
+#include "utils.h"
 
 namespace adblock {
 
@@ -52,6 +53,13 @@ v8::Local<v8::Value> JsValue::Call(const CallParams& args /*= CallParams()*/,
   }
 
   return handle_scope.Escape(result);
+}
+
+std::string JsValue::ToStdString() const {
+  if (!value_->IsString() && !value_->IsStringObject()) {
+    throw std::invalid_argument("ToStdString needs string object");
+  }
+  return V8_STRING_TO_STD_STRING(value_->ToString());
 }
 
 }  // namespace adblock

@@ -118,7 +118,12 @@ void TriggerCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
   JsValueList arguments = CONVERT_ARGUMENTS(args, 1);
   Environment* env = Environment::GetCurrent(isolate);
-  env->TriggerEvent(V8_STRING_TO_STD_STRING(args[0]->ToString()), arguments);
+  try {
+    env->TriggerEvent(V8_STRING_TO_STD_STRING(args[0]->ToString()), arguments);
+  }
+  catch (const std::exception& e) {
+    ADB_THROW_EXCEPTION(isolate, e.what());
+  }
 }
 
 void Setup(Environment* env) {
