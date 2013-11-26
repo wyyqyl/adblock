@@ -57,7 +57,6 @@ function onRequest(request, sender, sendResponse) {
 
       var filter = API.checkFilterMatch(request.url, request.type, request.documentUrl);
       if (filter.type == FilterType.BLOCKING_FILTER) {
-        console.log(request.url + " is collapsed");
         sendResponse(filter.collapse === null ? true : filter.collapse);
       } else {
         sendResponse(false);

@@ -34,7 +34,6 @@ function onBeforeRequest(details) {
   var frame = (type != "SUBDOCUMENT" ? details.frameId : details.parentFrameId);
   var filter = checkRequest(type, details.tabId, details.url, frame);
   if (filter && filter.type == FilterType.BLOCKING_FILTER) {
-    console.log(details.url + " is blocked");
     return {cancel: true};
   }
   return {};
