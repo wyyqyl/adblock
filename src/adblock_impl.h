@@ -19,7 +19,6 @@ class AdBlockImpl : public AdBlock {
                                const std::string& type,
                                const std::string& document);
   std::string GetElementHidingSelectors(const std::string& domain);
-  void AddSubscription(const std::string& url);
 
  private:
   Environment* env_;

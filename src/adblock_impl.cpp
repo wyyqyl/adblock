@@ -3,7 +3,6 @@
 
 #ifdef WIN32
 #include <Windows.h>
-#include <sstream>
 #endif  // WIN32
 
 #ifdef ENABLE_DEBUGGER_SUPPORT
@@ -151,15 +150,6 @@ std::string AdBlockImpl::GetElementHidingSelectors(const std::string& domain) {
 
   return V8_STRING_TO_STD_STRING(
       v8::Local<v8::String>::Cast<v8::Value>(func.Call(params)));
-}
-
-void AdBlockImpl::AddSubscription(const std::string& url) {
-  SETUP_THREAD_CONTEXT(env_);
-
-  JsValue func(isolate, env_->Evaluate("API.addSubscription"));
-  CallParams params;
-  params.emplace_back(v8::String::NewFromUtf8(isolate, url.c_str()));
-  func.Call(params);
 }
 
 }  // namespace adblock
