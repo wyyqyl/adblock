@@ -90,3 +90,21 @@ function IsAdblockPluginInstalled() {
   }
   return true;
 }
+
+function isFrameWhitelisted(tabId, frameId, type) {
+  var parent = frameId;
+  var parentData = getFrameData(tabId, parent);
+  while (parentData) {
+    var frame = parent;
+    var frameData = parentData;
+
+    parent = frameData.parent;
+    parentData = getFrameData(tabId, parent);
+
+    var frameUrl = frameData.url;
+    var parentUrl = (parentData ? parentData.url : frameUrl);
+    if (API.isWhitelisted(frameUrl, parentUrl, type))
+      return true;
+  }
+  return false;
+}
