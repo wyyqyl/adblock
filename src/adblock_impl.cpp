@@ -152,4 +152,32 @@ std::string AdBlockImpl::GetElementHidingSelectors(const std::string& domain) {
       v8::Local<v8::String>::Cast<v8::Value>(func.Call(params)));
 }
 
+bool AdBlockImpl::IsWhitelisted(const std::string& url,
+                                const std::string& parent_url,
+                                const std::string& type) {
+  SETUP_THREAD_CONTEXT(env_);
+
+  JsValue func(isolate, env_->Evaluate("API.isWhitelisted"));
+  CallParams params;
+  params.emplace_back(v8::String::NewFromUtf8(isolate, url.c_str()));
+  if (parent_url.length()) {
+    params.emplace_back(v8::String::NewFromUtf8(isolate, parent_url.c_str()));
+    if (type.length()) {
+      params.emplace_back(v8::String::NewFromUtf8(isolate, type.c_str()));
+    }
+  }
+
+  return func.Call(params)->BooleanValue();
+}
+
+void AdBlockImpl::ToggleEnabled(const std::string& url, bool enabled) {
+  SETUP_THREAD_CONTEXT(env_);
+
+  JsValue func(isolate, env_->Evaluate("API.toggleEnabled"));
+  CallParams params;
+  params.emplace_back(v8::String::NewFromUtf8(isolate, url.c_str()));
+  params.emplace_back(v8::Boolean::New(enabled));
+  func.Call(params);
+}
+
 }  // namespace adblock

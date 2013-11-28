@@ -19,6 +19,9 @@ class AdBlockImpl : public AdBlock {
                                const std::string& type,
                                const std::string& document);
   std::string GetElementHidingSelectors(const std::string& domain);
+  bool IsWhitelisted(const std::string& url, const std::string& parent_url,
+                     const std::string& type);
+  void ToggleEnabled(const std::string& url, bool enabled);
 
  private:
   Environment* env_;

@@ -90,14 +90,3 @@ function IsAdblockPluginInstalled() {
   }
   return true;
 }
-
-function isWhitelisted(url, parentUrl, type)
-{
-  // Ignore fragment identifier
-  var index = url.indexOf("#");
-  if (index >= 0)
-    url = url.substring(0, index);
-
-  var filter = API.checkFilterMatch(url, type || "DOCUMENT", parentUrl || url);
-  return filter.type == FilterType.WHITELIST_FILTER ? true : false;
-}

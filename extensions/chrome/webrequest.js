@@ -84,7 +84,7 @@ function isFrameWhitelisted(tabId, frameId, type) {
 
     var frameUrl = frameData.url;
     var parentUrl = (parentData ? parentData.url : frameUrl);
-    if ("keyException" in frameData || isWhitelisted(frameUrl, parentUrl, type))
+    if (API.isWhitelisted(frameUrl, parentUrl, type))
       return true;
   }
   return false;

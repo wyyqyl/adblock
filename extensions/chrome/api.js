@@ -18,6 +18,14 @@ var API = (function() {
 
     getElementHidingSelectors: function(domain) {
       return JSON.parse(plugin.getElementHidingSelectors(domain));
+    },
+
+    isWhitelisted: function(url, parentUrl, type) {
+      return plugin.isWhitelisted(url, parentUrl || "", type || "");
+    },
+
+    toggleEnabled: function(url, enabled) {
+      plugin.toggleEnabled(url, enabled || false);
     }
   };
 })();

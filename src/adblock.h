@@ -13,6 +13,10 @@ class AdBlock {
                                        const std::string& type,
                                        const std::string& document) = 0;
   virtual std::string GetElementHidingSelectors(const std::string& domain) = 0;
+  virtual bool IsWhitelisted(const std::string& url,
+                             const std::string& parent_url,
+                             const std::string& type) = 0;
+  virtual void ToggleEnabled(const std::string& url, bool enabled) = 0;
 };
 
 typedef boost::shared_ptr<AdBlock> AdBlockPtr;
