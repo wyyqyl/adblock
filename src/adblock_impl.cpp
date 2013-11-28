@@ -51,7 +51,7 @@ void CreateInstance(AdBlockPtr* adblock) {
 }
 
 AdBlockImpl::AdBlockImpl()
-    : is_first_run_(false), initialized_(false), collapse_(true) {}
+    : is_first_run_(false), initialized_(false), enabled_(true) {}
 
 AdBlockImpl::~AdBlockImpl() {
   if (env_ != nullptr) {
@@ -179,5 +179,9 @@ void AdBlockImpl::ToggleEnabled(const std::string& url, bool enabled) {
   params.emplace_back(v8::Boolean::New(enabled));
   func.Call(params);
 }
+
+bool AdBlockImpl::enabled() { return enabled_; }
+
+void AdBlockImpl::set_enabled(bool enabled) { enabled_ = enabled; }
 
 }  // namespace adblock

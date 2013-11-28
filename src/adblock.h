@@ -9,6 +9,8 @@ namespace adblock {
 class AdBlock {
  public:
   virtual ~AdBlock() {}
+  virtual bool enabled() = 0;
+  virtual void set_enabled(bool enabled) = 0;
   virtual std::string CheckFilterMatch(const std::string& location,
                                        const std::string& type,
                                        const std::string& document) = 0;
