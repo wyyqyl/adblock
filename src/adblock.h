@@ -6,6 +6,14 @@
 
 namespace adblock {
 
+typedef enum _IPC_CMD {
+  UNKNOWN = 0,
+  ENABLE_ADBLOCK,
+  DISABLE_ADBLOCK,
+  ADD_DOMAIN_TO_EXCEPTION_LIST,
+  REMOVE_DOMAIN_FROM_EXCEPTION_LIST
+} IPC_CMD;
+
 class AdBlock {
  public:
   virtual ~AdBlock() {}

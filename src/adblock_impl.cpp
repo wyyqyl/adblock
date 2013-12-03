@@ -10,6 +10,8 @@
 #endif  // ENABLE_DEBUGGER_SUPPORT
 
 #include <boost/bind.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 namespace adblock {
 
@@ -46,6 +48,9 @@ void CreateInstance(AdBlockPtr* adblock) {
   if (result->Init()) {
     *adblock = AdBlockPtr(result);
   } else {
+#ifdef WIN32
+    OutputDebugStringA("Failed to initialize adblock!!!");
+#endif  // WIN32
     delete result;
   }
 }
@@ -54,6 +59,7 @@ AdBlockImpl::AdBlockImpl()
     : is_first_run_(false), initialized_(false), enabled_(true) {}
 
 AdBlockImpl::~AdBlockImpl() {
+  ipc_server_.Dispose();
   if (env_ != nullptr) {
     v8::Locker locker(env_->isolate());
     v8::HandleScope handle_scope(env_->isolate());
@@ -70,6 +76,9 @@ bool AdBlockImpl::Init() {
     v8::Local<v8::Context> context = v8::Context::New(isolate);
     v8::Context::Scope context_scope(context);
 
+    ipc_server_.Init(this);
+    ipc_server_.Start();
+    ipc_client_.Init();
     env_ = Environment::New(context);
     js_object::Setup(env_);
 
@@ -116,14 +125,21 @@ void AdBlockImpl::BlockingHit(const JsValueList& args) {
   if (args.size() < 4) {
     throw std::invalid_argument("BlockingHit requires 4 parameters");
   }
-  std::string time(args[0]->ToStdString());
+  time_t time(args[0]->IntegerValue());
   std::string website(args[1]->ToStdString());
   std::string location(args[2]->ToStdString());
   std::string rule(args[3]->ToStdString());
-#ifdef WIN32
-  std::string detail = time + " " + website + " " + location + " " + rule;
-  OutputDebugStringA(detail.c_str());
-#endif  // WIN32
+
+  boost::property_tree::wptree root;
+  std::wstringstream ss;
+  root.put<time_t>(L"time", args[0]->IntegerValue());
+  root.put<std::wstring>(L"website",
+                         std::wstring(website.begin(), website.end()));
+  root.put<std::wstring>(L"location",
+                         std::wstring(location.begin(), location.end()));
+  root.put<std::wstring>(L"rule", std::wstring(rule.begin(), rule.end()));
+  boost::property_tree::write_json(ss, root, false);
+  ipc_client_.Send(ss.str());
 }
 
 std::string AdBlockImpl::CheckFilterMatch(const std::string& location,

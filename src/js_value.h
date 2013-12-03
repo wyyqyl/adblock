@@ -26,6 +26,7 @@ class JsValue {
   inline v8::Local<v8::Value> ToV8Value() const { return value_; }
   inline bool BooleanValue() const { return value_->BooleanValue(); }
   inline bool IsObject() const { return value_->IsObject(); }
+  inline int64_t IntegerValue() const { return value_->IntegerValue(); }
   std::string ToStdString() const;
 
  private:

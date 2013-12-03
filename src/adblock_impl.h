@@ -3,6 +3,7 @@
 
 #include "adblock.h"
 #include "js_value.h"
+#include "ipc.h"
 
 namespace adblock {
 
@@ -31,6 +32,8 @@ class AdBlockImpl : public AdBlock {
   bool is_first_run_;
   bool initialized_;
   bool enabled_;
+  IPCServer ipc_server_;
+  IPCClient ipc_client_;
 
   void InitDone(const JsValueList& args);
   void BlockingHit(const JsValueList& args);

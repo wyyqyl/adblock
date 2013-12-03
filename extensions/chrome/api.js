@@ -26,6 +26,10 @@ var API = (function() {
 
     toggleEnabled: function(url, enabled) {
       plugin.toggleEnabled(url, enabled || false);
+    },
+
+    enabled: function() {
+      return plugin.enabled();
     }
   };
 })();
