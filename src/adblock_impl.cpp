@@ -196,6 +196,13 @@ void AdBlockImpl::ToggleEnabled(const std::string& url, bool enabled) {
   func.Call(params);
 }
 
+std::string AdBlockImpl::GenerateCSSContent() {
+  SETUP_THREAD_CONTEXT(env_);
+
+  JsValue func(isolate, env_->Evaluate("API.generateCSSContent"));
+  return JsValue(isolate, func.Call()).ToStdString();
+}
+
 bool AdBlockImpl::enabled() { return enabled_; }
 
 void AdBlockImpl::set_enabled(bool enabled) { enabled_ = enabled; }

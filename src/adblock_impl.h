@@ -26,6 +26,7 @@ class AdBlockImpl : public AdBlock {
   bool IsWhitelisted(const std::string& url, const std::string& parent_url,
                      const std::string& type);
   void ToggleEnabled(const std::string& url, bool enabled);
+  std::string GenerateCSSContent();
 
  private:
   Environment* env_;

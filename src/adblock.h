@@ -27,6 +27,7 @@ class AdBlock {
                              const std::string& parent_url,
                              const std::string& type) = 0;
   virtual void ToggleEnabled(const std::string& url, bool enabled) = 0;
+  virtual std::string GenerateCSSContent() = 0;
 };
 
 typedef boost::shared_ptr<AdBlock> AdBlockPtr;
