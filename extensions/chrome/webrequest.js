@@ -3,13 +3,8 @@ chrome.webRequest.onBeforeRequest.addListener(onBeforeRequest, {urls: ["http://*
 
 var frames = {};
 function onBeforeRequest(details) {
-  if (IsAdblockPluginInstalled() == false) {
-    console.error("AnviAdblock plugin is not installed!");
-    return {};
-  }
-
-  if (details.tabId == -1)
-    return {};
+  if (!API.enabled()) return {};
+  if (details.tabId == -1) return {};
 
   var type = details.type;
 

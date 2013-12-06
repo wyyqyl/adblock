@@ -4,6 +4,7 @@ chrome.webNavigation.onCreatedNavigationTarget.addListener(onCreatedNavigationTa
 chrome.tabs.onUpdated.addListener(onUpdated);
 
 function onBeforeNavigate(details) {
+  if (!API.enabled()) return;
   if (details.tabId == -1) return;
   filter = API.checkFilterMatch(details.url, "DOCUMENT", details.url);
   if(filter.type != FilterType.WHITELIST_FILTER && filter.malware)
@@ -12,6 +13,7 @@ function onBeforeNavigate(details) {
 
 var tabsLoading = {};
 function onCreatedNavigationTarget(details) {
+  if (!API.enabled()) return;
   if (isFrameWhitelisted(details.sourceTabId, details.sourceFrameId))
     return;
 
@@ -27,6 +29,7 @@ function onCreatedNavigationTarget(details) {
 }
 
 function onUpdated(tabId, changeInfo, tab) {
+  if (!API.enabled()) return;
   if (!(tabId in tabsLoading))
   {
     // Not a pop-up we've previously seen

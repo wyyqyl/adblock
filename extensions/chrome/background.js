@@ -6,6 +6,10 @@ chrome.extension.onRequest.addListener(onRequest);
 var noStyleRulesHosts = ["mail.google.com", "mail.yahoo.com", "www.google.com"];
 
 function onRequest(request, sender, sendResponse) {
+  if (!API.enabled()) {
+    sendResponse();
+    return;
+  }
   switch (request.reqtype) {
     case "get-settings":
       var hostDomain = null;

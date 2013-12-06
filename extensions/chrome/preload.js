@@ -88,7 +88,10 @@ function init()
 
   chrome.extension.sendRequest({reqtype: "get-settings", selectors: true, frameUrl: window.location.href}, function(response)
   {
-    setElemhideCSSRules(response.selectors);
+    if (response) {
+      console.log(response);
+      setElemhideCSSRules(response.selectors);
+    }
   });
 }
 
