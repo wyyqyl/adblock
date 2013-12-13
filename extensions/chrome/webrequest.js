@@ -1,9 +1,10 @@
 
-chrome.webRequest.onBeforeRequest.addListener(onBeforeRequest, {urls: ["http://*/*", "https://*/*"]}, ["blocking"]);
+chrome.webRequest.onBeforeRequest.addListener(onBeforeRequest, {urls: ["<all_urls>"]}, ["blocking"]);
+chrome.webRequest.onBeforeSendHeaders.addListener(onBeforeSendHeaders, {urls: ["<all_urls>"]}, ["blocking", "requestHeaders"]);
 
 var frames = {};
 function onBeforeRequest(details) {
-  if (!API.enabled()) return {};
+  if (!API.blockAds()) return {};
   if (details.tabId == -1) return {};
 
   var type = details.type;
@@ -32,6 +33,13 @@ function onBeforeRequest(details) {
     return {cancel: true};
   }
   return {};
+}
+
+function onBeforeSendHeaders(details) {
+  if (API.dontTrackMe()) {
+    details.requestHeaders.push({name: "DNT", value: "1"});
+  }
+  return {requestHeaders: details.requestHeaders};
 }
 
 function recordFrame(tabId, frameId, parentFrameId, frameUrl) {

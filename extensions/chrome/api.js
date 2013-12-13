@@ -24,8 +24,16 @@ var API = (function() {
       return plugin.isWhitelisted(url, parentUrl || "", type || "");
     },
 
-    enabled: function() {
-      return plugin.enabled();
+    blockAds: function() {
+      return plugin.blockAds();
+    },
+
+    blockMalware: function() {
+      return plugin.blockMalware();
+    },
+
+    dontTrackMe: function() {
+      return plugin.dontTrackMe();
     }
   };
 })();

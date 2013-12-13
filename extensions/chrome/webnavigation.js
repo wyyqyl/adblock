@@ -4,7 +4,7 @@ chrome.webNavigation.onCreatedNavigationTarget.addListener(onCreatedNavigationTa
 chrome.tabs.onUpdated.addListener(onUpdated);
 
 function onBeforeNavigate(details) {
-  if (!API.enabled()) return;
+  if (!API.blockMalware()) return;
   if (details.tabId == -1) return;
   filter = API.checkFilterMatch(details.url, "DOCUMENT", details.url);
   if(filter.type != FilterType.WHITELIST_FILTER && filter.malware)
@@ -13,7 +13,6 @@ function onBeforeNavigate(details) {
 
 var tabsLoading = {};
 function onCreatedNavigationTarget(details) {
-  if (!API.enabled()) return;
   if (isFrameWhitelisted(details.sourceTabId, details.sourceFrameId))
     return;
 
@@ -29,7 +28,6 @@ function onCreatedNavigationTarget(details) {
 }
 
 function onUpdated(tabId, changeInfo, tab) {
-  if (!API.enabled()) return;
   if (!(tabId in tabsLoading))
   {
     // Not a pop-up we've previously seen
@@ -46,6 +44,10 @@ function onUpdated(tabId, changeInfo, tab) {
 function checkPotentialPopup(tabId, url, opener)
 {
   var filter = API.checkFilterMatch(url || "about:blank", "POPUP", opener);
-  if (filter.type == FilterType.BLOCKING_FILTER)
-    chrome.tabs.remove(tabId);
+  if (filter.type == FilterType.BLOCKING_FILTER) {
+    if ((filter.malware && API.blockMalware()) ||
+        (filter.malware === undefined && API.blockAds())) {
+      chrome.tabs.remove(tabId);
+    }
+  }
 }
