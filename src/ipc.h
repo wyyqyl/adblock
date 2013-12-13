@@ -1,55 +1,40 @@
 #ifndef IPC_H_
 #define IPC_H_
 
-#include <Windows.h>
-#include <string>
+#include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/interprocess/ipc/message_queue.hpp>
 
 namespace adblock {
 
-#define BUFLENGTH 512
-#define BUFSIZE BUFLENGTH * sizeof(WCHAR)
-#define PIPE_INSTANCES 4
+typedef struct _AdblockControl {
+  bool block_ads;
+  bool block_malware;
+  bool dont_track_me;
+} AdblockControl;
 
-typedef struct _PIPE_INSTANCE {
-  bool pending;
-  HANDLE pipe;
-  DWORD state;
-  DWORD bytes_read;
-  DWORD bytes_to_write;
-  OVERLAPPED ovlp;
-  WCHAR buffer[BUFLENGTH];
-} PIPE_INST, *PPIPE_INST;
-
-class AdBlockImpl;
-class IPCServer {
+class AdblockConfig {
  public:
-  IPCServer();
-  ~IPCServer();
-  bool Init(AdBlockImpl* adblock);
-  void Start();
-  void Dispose();
+  AdblockConfig();
+  ~AdblockConfig();
+
+  bool block_ads();
+  bool block_malware();
+  bool dont_track_me();
 
  private:
-  PIPE_INST pipe_[PIPE_INSTANCES];
-  HANDLE ovlp_events_[PIPE_INSTANCES];
-  HANDLE exit_event_;
-  AdBlockImpl* adblock_;
+  AdblockControl* adblock_control_;
 
-  void Run();
-  void ConnectToNewClient(int idx);
-  void RestartConnection(int idx);
-  void ProcessMsg(int idx);
+  bool Init();
 };
 
-class IPCClient {
+class AdblockSender {
  public:
-  IPCClient();
-  ~IPCClient();
-  bool Init();
-  void Send(const std::wstring& msg);
+  AdblockSender();
+  ~AdblockSender();
+  void Send(const std::string& msg);
 
  private:
-  HANDLE pipe_;
+  boost::interprocess::message_queue* queue_;
 };
 
 }  // namespace adblock

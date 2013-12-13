@@ -16,8 +16,9 @@ class AdBlockImpl : public AdBlock {
 
   bool Init();
 
-  bool enabled();
-  void set_enabled(bool enabled);
+  bool block_ads();
+  bool block_malware();
+  bool dont_track_me();
 
   std::string CheckFilterMatch(const std::string& location,
                                const std::string& type,
@@ -32,9 +33,8 @@ class AdBlockImpl : public AdBlock {
   Environment* env_;
   bool is_first_run_;
   bool initialized_;
-  bool enabled_;
-  IPCServer ipc_server_;
-  IPCClient ipc_client_;
+  AdblockConfig config_;
+  AdblockSender sender_;
 
   void InitDone(const JsValueList& args);
   void BlockingHit(const JsValueList& args);

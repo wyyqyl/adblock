@@ -1,5 +1,6 @@
 #include "adblock_impl.h"
 #include "js_object.h"
+#include <boost/interprocess/managed_shared_memory.hpp>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -55,11 +56,9 @@ void CreateInstance(AdBlockPtr* adblock) {
   }
 }
 
-AdBlockImpl::AdBlockImpl()
-    : is_first_run_(false), initialized_(false), enabled_(true) {}
+AdBlockImpl::AdBlockImpl() : is_first_run_(false), initialized_(false) {}
 
 AdBlockImpl::~AdBlockImpl() {
-  ipc_server_.Dispose();
   if (env_ != nullptr) {
     v8::Locker locker(env_->isolate());
     v8::HandleScope handle_scope(env_->isolate());
@@ -76,9 +75,6 @@ bool AdBlockImpl::Init() {
     v8::Local<v8::Context> context = v8::Context::New(isolate);
     v8::Context::Scope context_scope(context);
 
-    ipc_server_.Init(this);
-    ipc_server_.Start();
-    ipc_client_.Init();
     env_ = Environment::New(context);
     js_object::Setup(env_);
 
@@ -130,16 +126,15 @@ void AdBlockImpl::BlockingHit(const JsValueList& args) {
   std::string location(args[2]->ToStdString());
   std::string rule(args[3]->ToStdString());
 
-  boost::property_tree::wptree root;
-  std::wstringstream ss;
-  root.put<time_t>(L"time", args[0]->IntegerValue());
-  root.put<std::wstring>(L"website",
-                         std::wstring(website.begin(), website.end()));
-  root.put<std::wstring>(L"location",
-                         std::wstring(location.begin(), location.end()));
-  root.put<std::wstring>(L"rule", std::wstring(rule.begin(), rule.end()));
+  boost::property_tree::ptree root;
+  std::stringstream ss;
+  root.put<time_t>("time", args[0]->IntegerValue());
+  root.put<std::string>("type", "ads");
+  root.put<std::string>("website", website);
+  root.put<std::string>("location", location);
+  root.put<std::string>("rule", rule);
   boost::property_tree::write_json(ss, root, false);
-  ipc_client_.Send(ss.str());
+  sender_.Send(ss.str());
 }
 
 std::string AdBlockImpl::CheckFilterMatch(const std::string& location,
@@ -203,8 +198,10 @@ std::string AdBlockImpl::GenerateCSSContent() {
   return JsValue(isolate, func.Call()).ToStdString();
 }
 
-bool AdBlockImpl::enabled() { return enabled_; }
+bool AdBlockImpl::block_ads() { return config_.block_ads(); }
 
-void AdBlockImpl::set_enabled(bool enabled) { enabled_ = enabled; }
+bool AdBlockImpl::block_malware() { return config_.block_malware(); }
+
+bool AdBlockImpl::dont_track_me() { return config_.dont_track_me(); }
 
 }  // namespace adblock
