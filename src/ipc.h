@@ -22,6 +22,7 @@ class AdblockConfig {
   bool dont_track_me();
 
  private:
+  boost::interprocess::managed_shared_memory* segment_;
   AdblockControl* adblock_control_;
 
   bool Init();

@@ -1,5 +1,11 @@
 #include "env.h"
 #include "js_error.h"
+#include <boost/filesystem/operations.hpp>
+#include <glog/logging.h>
+
+#ifdef WIN32
+#include <Windows.h>
+#endif  // WIN32
 
 namespace {
 
@@ -23,6 +29,29 @@ Environment::Environment(const v8::Local<v8::Context>& context)
       context_(context->GetIsolate(), context) {
   event_map_.clear();
   timeout_threads_.clear();
+
+  boost::filesystem::path dir(boost::filesystem::current_path());
+#ifdef WIN32
+  HKEY hkey = nullptr;
+  char value[MAX_PATH] = {0};
+  DWORD length = MAX_PATH;
+  LONG status = RegOpenKeyExA(
+      HKEY_CURRENT_USER, "Software\\MozillaPlugins\\anvisoft.com/AdblockPlugin",
+      0, KEY_READ, &hkey);
+  if (status == ERROR_SUCCESS) {
+    status = RegQueryValueExA(hkey, "Path", NULL, NULL, (LPBYTE)value, &length);
+    RegCloseKey(hkey);
+    if (status == ERROR_SUCCESS) {
+      dir = std::string(value, length);
+      dir = dir.parent_path();
+    }
+  }
+#endif  // WIN32
+  current_path_ = dir.string();
+
+  google::InitGoogleLogging("adblock");
+  FLAGS_log_dir = boost::filesystem::absolute("Logs", current_path_).string();
+  FLAGS_alsologtodbg = true;
 }
 
 Environment::~Environment() {
@@ -33,6 +62,7 @@ Environment::~Environment() {
     delete *it;
     *it = nullptr;
   }
+  google::ShutdownGoogleLogging();
 }
 
 Environment* Environment::New(const v8::Local<v8::Context>& context) {
@@ -98,7 +128,7 @@ void Environment::SetFileSystem(FileSystemPtr file_system) {
 
 FileSystemPtr Environment::GetFileSystem() {
   if (!file_system_) {
-    file_system_.reset(new DefaultFileSystem());
+    file_system_.reset(new DefaultFileSystem(current_path_));
   }
   return file_system_;
 }

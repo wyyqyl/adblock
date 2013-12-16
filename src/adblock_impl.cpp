@@ -1,6 +1,5 @@
 #include "adblock_impl.h"
 #include "js_object.h"
-#include <boost/interprocess/managed_shared_memory.hpp>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -13,6 +12,9 @@
 #include <boost/bind.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp>
+
+#include <glog/logging.h>
 
 namespace adblock {
 

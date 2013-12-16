@@ -69,6 +69,7 @@ class Environment {
   FileSystemPtr file_system_;
   LogSystemPtr log_system_;
   WebRequestPtr web_request_;
+  std::string current_path_;
 };
 
 }  // namespace adblock

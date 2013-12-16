@@ -3,9 +3,6 @@
 #include <sstream>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
-#ifdef WIN32
-#include <Windows.h>
-#endif  // WIN32
 
 namespace adblock {
 
@@ -17,9 +14,13 @@ class RuntimeErrorWithErrno : public std::runtime_error {
 
 namespace fs = boost::filesystem;
 
+DefaultFileSystem::DefaultFileSystem(const std::string& cwd /*= ""*/)
+    : current_path_(cwd) {
 #ifdef _MSC_VER
-DefaultFileSystem::DefaultFileSystem() { fs::path::imbue(std::locale("")); }
+  // fix for https://svn.boost.org/trac/boost/ticket/6320
+  fs::path::imbue(std::locale(""));
 #endif  // _MSC_VER
+}
 
 std::string DefaultFileSystem::Read(const std::string& path) const {
   fs::ifstream fstream(path);
@@ -55,27 +56,11 @@ FileSystem::StatResult DefaultFileSystem::Stat(const std::string& path) const {
   return result;
 }
 
-std::string DefaultFileSystem::Resolve(const std::string& path) const {
-  fs::path dir(fs::current_path());
-
-#ifdef WIN32
-  HKEY hkey = nullptr;
-  char value[MAX_PATH] = {0};
-  DWORD length = MAX_PATH;
-  LONG status = RegOpenKeyExA(
-      HKEY_CURRENT_USER, "Software\\MozillaPlugins\\anvisoft.com/AdblockPlugin",
-      0, KEY_READ, &hkey);
-  if (status == ERROR_SUCCESS) {
-    status = RegQueryValueExA(hkey, "Path", NULL, NULL, (LPBYTE)value, &length);
-    RegCloseKey(hkey);
-    if (status == ERROR_SUCCESS) {
-      dir = std::string(value, length);
-      dir = dir.parent_path();
-    }
+std::string DefaultFileSystem::Resolve(const std::string& path) {
+  if (current_path_.length() == 0) {
+    current_path_ = fs::current_path().string();
   }
-#endif  // WIN32
-
-  return fs::absolute(path, dir).string();
+  return fs::absolute(path, current_path_).string();
 }
 
 }  // namespace adblock

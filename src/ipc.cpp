@@ -1,24 +1,38 @@
 #include "ipc.h"
+#include <glog/logging.h>
 
 namespace adblock {
 
 namespace ipc = boost::interprocess;
 namespace pt = boost::posix_time;
 
-AdblockConfig::AdblockConfig() : adblock_control_(nullptr) {}
+AdblockConfig::AdblockConfig() : adblock_control_(nullptr), segment_(nullptr) {}
+
+AdblockConfig::~AdblockConfig() {
+  if (segment_ != nullptr) {
+    delete segment_;
+    segment_ = nullptr;
+  }
+}
 
 bool AdblockConfig::Init() {
   // Init shared memory
   try {
-    ipc::managed_shared_memory segment(ipc::open_only, "MySharedMemory");
-    auto res = segment.find<AdblockControl>("AdblockControl");
-    if (res.second == 1 && res.first != nullptr) {
-      adblock_control_ = res.first;
-      return true;
+    if (!segment_) {
+      segment_ =
+          new ipc::managed_shared_memory(ipc::open_only, "MySharedMemory");
+    }
+    if (segment_) {
+      auto res = segment_->find<AdblockControl>("AdblockControl");
+      if (res.second == 1 && res.first != nullptr) {
+        adblock_control_ = res.first;
+        return true;
+      }
     }
     return false;
   }
   catch (const ipc::interprocess_exception& e) {
+    LOG(ERROR) << "[AdblockConfig::Init()] " << e.what() << std::endl;
     return false;
   }
 }
@@ -53,8 +67,6 @@ bool AdblockConfig::dont_track_me() {
   return false;
 }
 
-AdblockConfig::~AdblockConfig() {}
-
 AdblockSender::AdblockSender() : queue_(nullptr) {}
 
 AdblockSender::~AdblockSender() {
@@ -65,20 +77,23 @@ AdblockSender::~AdblockSender() {
 }
 
 void AdblockSender::Send(const std::string& msg) {
-  if (!queue_) {
-    try {
+  try {
+    if (!queue_) {
       queue_ = new ipc::message_queue(ipc::open_only, "message_queue");
     }
-    catch (const ipc::interprocess_exception& e) {
-      return;
-    }
-    catch (const std::bad_alloc& e) {
-      return;
-    }
+    pt::ptime abs_time(pt::microsec_clock::universal_time() +
+                       pt::time_duration(0, 0, 1));
+    queue_->timed_send(msg.data(), msg.size(), 0, abs_time);
   }
-  pt::ptime abs_time(pt::microsec_clock::universal_time() +
-                     pt::time_duration(0, 0, 1));
-  queue_->timed_send(msg.data(), msg.size(), 0, abs_time);
+  catch (const ipc::interprocess_exception& e) {
+    LOG(ERROR) << "[AdblockSender::Send] " << e.what() << std::endl;
+    return;
+  }
+  catch (const std::bad_alloc&) {
+    LOG(ERROR) << "Failed to allocate memory when creating message_queue object"
+               << std::endl;
+    return;
+  }
 }
 
 }  // namespace adblock
