@@ -25,7 +25,7 @@ var API = (function() {
     },
 
     toggleEnabled: function(url, enabled) {
-      return plugin.ToggleEnabled(url, enabled || false);
+      return plugin.toggleEnabled(url, enabled || false);
     },
 
     blockAds: function() {

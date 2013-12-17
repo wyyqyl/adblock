@@ -66,6 +66,10 @@ function onRequest(request, sender, sendResponse) {
         sendResponse(false);
       }
       break;
+    case "add2whitelist":
+      API.toggleEnabled(request.url);
+      chrome.tabs.update({url: request.url});
+      break;
     default:
       sendResponse({});
       break;
