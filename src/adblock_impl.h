@@ -29,7 +29,7 @@ class AdBlockImpl : public AdBlock {
   void ToggleEnabled(const std::string& url, bool enabled);
   std::string GenerateCSSContent();
   void Report(const std::string& type, const std::string& documentUrl,
-              const std::string& url, const std::string& filter);
+              const std::string& url, const std::string& rule);
 
  private:
   Environment* env_;
