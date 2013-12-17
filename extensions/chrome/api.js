@@ -24,6 +24,10 @@ var API = (function() {
       return plugin.isWhitelisted(url, parentUrl || "", type || "");
     },
 
+    toggleEnabled: function(url, enabled) {
+      return plugin.ToggleEnabled(url, enabled || false);
+    },
+
     blockAds: function() {
       return plugin.blockAds();
     },
