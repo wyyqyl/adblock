@@ -84,6 +84,8 @@ bool AdBlockImpl::Init() {
                            boost::bind(&AdBlockImpl::InitDone, this, _1));
     env_->SetEventCallback("BlockingHit",
                            boost::bind(&AdBlockImpl::BlockingHit, this, _1));
+    env_->SetEventCallback("MalwareHit",
+                           boost::bind(&AdBlockImpl::MalwareHit, this, _1));
 #ifdef ENABLE_DEBUGGER_SUPPORT
     debug_message_context.Reset(isolate, context);
     v8::Debug::SetDebugMessageDispatchHandler(DispatchDebugMessages, true);
@@ -135,6 +137,22 @@ void AdBlockImpl::BlockingHit(const JsValueList& args) {
   root.put<std::string>("website", website);
   root.put<std::string>("location", location);
   root.put<std::string>("rule", rule);
+  boost::property_tree::write_json(ss, root, false);
+  sender_.Send(ss.str());
+}
+
+void AdBlockImpl::MalwareHit(const JsValueList& args) {
+  if (args.size() < 2) {
+    throw std::invalid_argument("MalwareHit requires 2 parameters");
+  }
+  time_t time(args[0]->IntegerValue());
+  std::string website(args[1]->ToStdString());
+
+  boost::property_tree::ptree root;
+  std::stringstream ss;
+  root.put<time_t>("time", args[0]->IntegerValue());
+  root.put<std::string>("type", "malware");
+  root.put<std::string>("website", website);
   boost::property_tree::write_json(ss, root, false);
   sender_.Send(ss.str());
 }
@@ -198,6 +216,23 @@ std::string AdBlockImpl::GenerateCSSContent() {
 
   JsValue func(isolate, env_->Evaluate("API.generateCSSContent"));
   return JsValue(isolate, func.Call()).ToStdString();
+}
+
+void AdBlockImpl::Report(const std::string& type,
+                         const std::string& documentUrl, const std::string& url,
+                         const std::string& filter) {
+  SETUP_THREAD_CONTEXT(env_);
+  JsValue func(isolate, env_->Evaluate("API.report"));
+  CallParams params;
+  params.emplace_back(v8::String::NewFromUtf8(isolate, type.c_str()));
+  params.emplace_back(v8::String::NewFromUtf8(isolate, documentUrl.c_str()));
+  if (url.length()) {
+    params.emplace_back(v8::String::NewFromUtf8(isolate, url.c_str()));
+    if (filter.length()) {
+      params.emplace_back(v8::String::NewFromUtf8(isolate, filter.c_str()));
+    }
+  }
+  func.Call(params);
 }
 
 bool AdBlockImpl::block_ads() { return config_.block_ads(); }

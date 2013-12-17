@@ -28,6 +28,8 @@ class AdBlockImpl : public AdBlock {
                      const std::string& type);
   void ToggleEnabled(const std::string& url, bool enabled);
   std::string GenerateCSSContent();
+  void Report(const std::string& type, const std::string& documentUrl,
+              const std::string& url, const std::string& filter);
 
  private:
   Environment* env_;
@@ -38,6 +40,7 @@ class AdBlockImpl : public AdBlock {
 
   void InitDone(const JsValueList& args);
   void BlockingHit(const JsValueList& args);
+  void MalwareHit(const JsValueList& args);
 };
 
 }  // namespace adblock

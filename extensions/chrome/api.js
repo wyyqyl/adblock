@@ -34,6 +34,10 @@ var API = (function() {
 
     dontTrackMe: function() {
       return plugin.dontTrackMe();
+    },
+    
+    report: function(type, documentUrl, url, filter) {
+      plugin.report(type, documentUrl, url || "", filter || "")
     }
   };
 })();

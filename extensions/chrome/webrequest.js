@@ -28,8 +28,16 @@ function onBeforeRequest(details) {
     type = type.toUpperCase();
 
   var frame = (type != "SUBDOCUMENT" ? details.frameId : details.parentFrameId);
-  var filter = checkRequest(type, details.tabId, details.url, frame);
-  if (filter && filter.type == FilterType.BLOCKING_FILTER) {
+  if (isFrameWhitelisted(details.tabId, frame))
+    return {};
+
+  var documentUrl = getFrameUrl(details.tabId, frame);
+  if (!documentUrl)
+    return {};
+
+  var filter = API.checkFilterMatch(details.url, type, documentUrl);
+  if (filter.type == FilterType.BLOCKING_FILTER) {
+    API.report("ads", documentUrl, details.url, filter.text);
     return {cancel: true};
   }
   return {};
@@ -61,16 +69,4 @@ function getFrameData(tabId, frameId) {
 function getFrameUrl(tabId, frameId) {
   var frameData = getFrameData(tabId, frameId);
   return (frameData ? frameData.url : null);
-}
-
-function checkRequest(type, tabId, url, frameId) {
-  if (isFrameWhitelisted(tabId, frameId))
-    return null;
-
-  var documentUrl = getFrameUrl(tabId, frameId);
-
-  if (!documentUrl)
-    return null;
-
-  return API.checkFilterMatch(url, type, documentUrl);
 }

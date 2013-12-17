@@ -6,9 +6,11 @@ chrome.tabs.onUpdated.addListener(onUpdated);
 function onBeforeNavigate(details) {
   if (!API.blockMalware()) return;
   if (details.tabId == -1) return;
-  filter = API.checkFilterMatch(details.url, "DOCUMENT", details.url);
-  if(filter.type != FilterType.WHITELIST_FILTER && filter.malware)
+  var filter = API.checkFilterMatch(details.url, "DOCUMENT", details.url);
+  if(filter.type == FilterType.BLOCKING_FILTER && filter.malware) {
+    API.report("malware", details.url);
     chrome.tabs.update(details.tabId, {url: "http://WANGYAOYAO/adblock/malware.php?url=" + details.url});
+  }
 }
 
 var tabsLoading = {};
