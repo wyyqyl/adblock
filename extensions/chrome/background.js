@@ -70,6 +70,14 @@ function onRequest(request, sender, sendResponse) {
       API.toggleEnabled(request.url);
       chrome.tabs.update({url: request.url});
       break;
+    case "toggleEnabled":
+      var tab = request.tab;
+      API.toggleEnabled(tab.url, request.enabled);
+      refreshIcon(tab);
+      break;
+    case "checkEnabled":
+      sendResponse(!API.isWhitelisted(request.url));
+      break;
     default:
       sendResponse({});
       break;

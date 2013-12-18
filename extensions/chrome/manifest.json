@@ -6,6 +6,7 @@
   "description": "AnviAdblock Plugin",
 
   "permissions": [
+    "tabs",
     "https://*/*",
     "http://*//*",
     "webRequest",
@@ -26,7 +27,13 @@
       "run_at": "document_idle"
     }
    ],
-  
+
+  "page_action": {
+    "default_icon": "abp-19.png",
+    "default_popup": "popup.html",
+    "default_title": "Anvisoft Adblock"
+  },
+
   "background": {
     "page": "background.html"
   }
