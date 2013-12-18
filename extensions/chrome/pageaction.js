@@ -3,6 +3,14 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   if(changeInfo.status == "loading")
     refreshIcon(tab);
 });
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+  chrome.tabs.get(activeInfo.tabId, refreshIcon);
+});
+chrome.windows.onFocusChanged.addListener(function(windowId) {
+  chrome.tabs.query({active: true, windowId: windowId}, function(tabs) {
+    tabs.forEach(refreshIcon);
+  });
+});
 
 function refreshIcon(tab) {
   // The tab could have been closed by the time this function is called
