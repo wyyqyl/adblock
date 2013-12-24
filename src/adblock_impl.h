@@ -40,8 +40,6 @@ class AdBlockImpl : public AdBlock {
 
   std::string GetCurrentProcessName();
   void InitDone(const JsValueList& args);
-  void BlockingHit(const JsValueList& args);
-  void MalwareHit(const JsValueList& args);
 };
 
 }  // namespace adblock

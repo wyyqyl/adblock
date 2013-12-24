@@ -1,5 +1,6 @@
 #include "adblock_impl.h"
 #include "js_object.h"
+#include <ctime>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -83,10 +84,6 @@ bool AdBlockImpl::Init() {
 
     env_->SetEventCallback("init",
                            boost::bind(&AdBlockImpl::InitDone, this, _1));
-    env_->SetEventCallback("BlockingHit",
-                           boost::bind(&AdBlockImpl::BlockingHit, this, _1));
-    env_->SetEventCallback("MalwareHit",
-                           boost::bind(&AdBlockImpl::MalwareHit, this, _1));
 #ifdef ENABLE_DEBUGGER_SUPPORT
     debug_message_context.Reset(isolate, context);
     v8::Debug::SetDebugMessageDispatchHandler(DispatchDebugMessages, true);
@@ -120,46 +117,6 @@ void AdBlockImpl::InitDone(const JsValueList& args) {
   env_->RemoveEventCallback("init");
   is_first_run_ = args.size() && args.front()->BooleanValue();
   initialized_ = true;
-}
-
-void AdBlockImpl::BlockingHit(const JsValueList& args) {
-  if (args.size() < 4) {
-    throw std::invalid_argument("BlockingHit requires 4 parameters");
-  }
-  time_t time(args[0]->IntegerValue());
-  std::string website(args[1]->ToStdString());
-  std::string location(args[2]->ToStdString());
-  std::string rule(args[3]->ToStdString());
-
-  boost::property_tree::ptree root;
-  std::stringstream ss;
-  root.put<time_t>("time", args[0]->IntegerValue());
-  root.put<std::string>("type", "ads");
-  root.put<int>("pid", GetCurrentProcessId());
-  root.put<std::string>("process", GetCurrentProcessName());
-  root.put<std::string>("website", website);
-  root.put<std::string>("location", location);
-  root.put<std::string>("rule", rule);
-  boost::property_tree::write_json(ss, root, false);
-  sender_.Send(ss.str());
-}
-
-void AdBlockImpl::MalwareHit(const JsValueList& args) {
-  if (args.size() < 2) {
-    throw std::invalid_argument("MalwareHit requires 2 parameters");
-  }
-  time_t time(args[0]->IntegerValue());
-  std::string website(args[1]->ToStdString());
-
-  boost::property_tree::ptree root;
-  std::stringstream ss;
-  root.put<time_t>("time", args[0]->IntegerValue());
-  root.put<std::string>("type", "malware");
-  root.put<int>("pid", GetCurrentProcessId());
-  root.put<std::string>("process", GetCurrentProcessName());
-  root.put<std::string>("website", website);
-  boost::property_tree::write_json(ss, root, false);
-  sender_.Send(ss.str());
 }
 
 std::string AdBlockImpl::CheckFilterMatch(const std::string& location,
@@ -225,19 +182,24 @@ std::string AdBlockImpl::GenerateCSSContent() {
 
 void AdBlockImpl::Report(const std::string& type,
                          const std::string& documentUrl, const std::string& url,
-                         const std::string& filter) {
-  SETUP_THREAD_CONTEXT(env_);
-  JsValue func(isolate, env_->Evaluate("API.report"));
-  CallParams params;
-  params.emplace_back(v8::String::NewFromUtf8(isolate, type.c_str()));
-  params.emplace_back(v8::String::NewFromUtf8(isolate, documentUrl.c_str()));
+                         const std::string& rule) {
+  boost::property_tree::ptree root;
+  std::stringstream ss;
+
+  root.put<std::time_t>("time", std::time(nullptr));
+  root.put<std::string>("type", type);
+  root.put<int>("pid", GetCurrentProcessId());
+  root.put<std::string>("process", GetCurrentProcessName());
+  root.put<std::string>("website", documentUrl);
   if (url.length()) {
-    params.emplace_back(v8::String::NewFromUtf8(isolate, url.c_str()));
-    if (filter.length()) {
-      params.emplace_back(v8::String::NewFromUtf8(isolate, filter.c_str()));
+    root.put<std::string>("location", url);
+    if (rule.length()) {
+      root.put<std::string>("rule", rule);
     }
   }
-  func.Call(params);
+
+  boost::property_tree::write_json(ss, root, false);
+  sender_.Send(ss.str());
 }
 
 bool AdBlockImpl::block_ads() { return config_.block_ads(); }
