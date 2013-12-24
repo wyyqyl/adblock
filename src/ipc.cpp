@@ -20,7 +20,7 @@ bool AdblockConfig::Init() {
   try {
     if (!segment_) {
       segment_ =
-          new ipc::managed_shared_memory(ipc::open_only, "MySharedMemory");
+          new ipc::managed_shared_memory(ipc::open_only, "asdv2_adblock_shared_object_{5095C5F0-D82D-4442-9A62-8769871F42D1}");
     }
     if (segment_) {
       auto res = segment_->find<AdblockControl>("AdblockControl");
@@ -79,7 +79,7 @@ AdblockSender::~AdblockSender() {
 void AdblockSender::Send(const std::string& msg) {
   try {
     if (!queue_) {
-      queue_ = new ipc::message_queue(ipc::open_only, "message_queue");
+      queue_ = new ipc::message_queue(ipc::open_only, "asdv2_adblock_shared_queue_{5095C5F0-D82D-4442-9A62-8769871F42D1}");
     }
     pt::ptime abs_time(pt::microsec_clock::universal_time() +
                        pt::time_duration(0, 0, 1));
