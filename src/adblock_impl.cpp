@@ -13,6 +13,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include <glog/logging.h>
 
@@ -134,6 +135,8 @@ void AdBlockImpl::BlockingHit(const JsValueList& args) {
   std::stringstream ss;
   root.put<time_t>("time", args[0]->IntegerValue());
   root.put<std::string>("type", "ads");
+  root.put<int>("pid", GetCurrentProcessId());
+  root.put<std::string>("process", GetCurrentProcessName());
   root.put<std::string>("website", website);
   root.put<std::string>("location", location);
   root.put<std::string>("rule", rule);
@@ -152,6 +155,8 @@ void AdBlockImpl::MalwareHit(const JsValueList& args) {
   std::stringstream ss;
   root.put<time_t>("time", args[0]->IntegerValue());
   root.put<std::string>("type", "malware");
+  root.put<int>("pid", GetCurrentProcessId());
+  root.put<std::string>("process", GetCurrentProcessName());
   root.put<std::string>("website", website);
   boost::property_tree::write_json(ss, root, false);
   sender_.Send(ss.str());
@@ -240,5 +245,14 @@ bool AdBlockImpl::block_ads() { return config_.block_ads(); }
 bool AdBlockImpl::block_malware() { return config_.block_malware(); }
 
 bool AdBlockImpl::dont_track_me() { return config_.dont_track_me(); }
+
+std::string AdBlockImpl::GetCurrentProcessName() {
+  char file_name[MAX_PATH] = {0};
+  if (GetModuleFileNameA(NULL, file_name, MAX_PATH)) {
+    boost::filesystem::path path(file_name);
+    return path.filename().string();
+  }
+  return "";
+}
 
 }  // namespace adblock

@@ -38,6 +38,7 @@ class AdBlockImpl : public AdBlock {
   AdblockConfig config_;
   AdblockSender sender_;
 
+  std::string GetCurrentProcessName();
   void InitDone(const JsValueList& args);
   void BlockingHit(const JsValueList& args);
   void MalwareHit(const JsValueList& args);
