@@ -4,7 +4,6 @@
 namespace adblock {
 
 namespace ipc = boost::interprocess;
-namespace pt = boost::posix_time;
 
 AdblockConfig::AdblockConfig() : adblock_control_(nullptr), segment_(nullptr) {}
 
@@ -84,9 +83,7 @@ void AdblockSender::Send(const std::string& msg) {
           ipc::open_only,
           "asdv2_adblock_shared_queue_{5095C5F0-D82D-4442-9A62-8769871F42D1}");
     }
-    pt::ptime abs_time(pt::microsec_clock::universal_time() +
-                       pt::time_duration(0, 0, 1));
-    queue_->timed_send(msg.data(), msg.size(), 0, abs_time);
+    queue_->try_send(msg.data(), msg.size(), 0);
   }
   catch (const ipc::interprocess_exception& e) {
     LOG(ERROR) << "[AdblockSender::Send] " << e.what() << std::endl;
