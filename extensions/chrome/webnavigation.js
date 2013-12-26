@@ -11,6 +11,7 @@ function onBeforeNavigate(details) {
     API.report("malware", details.url);
     chrome.tabs.update(details.tabId, {url: "http://WANGYAOYAO/adblock/malware.php?url=" + details.url});
   }
+  API.report("trace", details.url);
 }
 
 var tabsLoading = {};
