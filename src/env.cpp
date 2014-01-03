@@ -32,17 +32,12 @@ Environment::Environment(const v8::Local<v8::Context>& context)
 
   boost::filesystem::path dir(boost::filesystem::current_path());
 #ifdef WIN32
-  HKEY hkey = nullptr;
-  char value[MAX_PATH] = {0};
-  DWORD length = MAX_PATH;
-  LONG status = RegOpenKeyExA(
-      HKEY_CURRENT_USER, "Software\\MozillaPlugins\\anvisoft.com/AdblockPlugin",
-      0, KEY_READ, &hkey);
-  if (status == ERROR_SUCCESS) {
-    status = RegQueryValueExA(hkey, "Path", NULL, NULL, (LPBYTE)value, &length);
-    RegCloseKey(hkey);
-    if (status == ERROR_SUCCESS) {
-      dir = std::string(value, length);
+  char path[MAX_PATH] = {0};
+  HMODULE hPlugin = GetModuleHandleA("npAdblockPlugin.dll");
+  if (hPlugin) {
+    DWORD length = GetModuleFileNameA(hPlugin, path, MAX_PATH);
+    if (length > 0) {
+      dir = std::string(path, length);
       dir = dir.parent_path();
     }
   }
