@@ -3,7 +3,7 @@
   "name": "AnviAdblock",
   "version": "1.0",
 
-  "description": "AnviAdblock Plugin",
+  "description": "AnviAdblock Extension",
 
   "permissions": [
     "tabs",
@@ -22,7 +22,7 @@
       "run_at": "document_start"
     },
     {
-      "matches": ["http://wangyaoyao/*"],
+      "matches": ["http://cloud2.anvisoft.com/interface/adblock/malware"],
       "js": ["inject.js"],
       "run_at": "document_idle"
     }

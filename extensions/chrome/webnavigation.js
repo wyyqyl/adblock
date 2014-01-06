@@ -10,7 +10,7 @@ function onBeforeNavigate(details) {
   var filter = API.checkFilterMatch(details.url, "DOCUMENT", details.url);
   if(filter.type == FilterType.BLOCKING_FILTER && filter.malware) {
     API.report("malware", details.url);
-    chrome.tabs.update(details.tabId, {url: "http://WANGYAOYAO/adblock/malware.php?url=" + details.url});
+    chrome.tabs.update(details.tabId, {url: "http://cloud2.anvisoft.com/interface/adblock/malware?url=" + details.url});
   }
 }
 
