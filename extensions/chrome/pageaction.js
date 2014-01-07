@@ -23,7 +23,8 @@ function refreshIcon(tab) {
   chrome.pageAction.setIcon({tabId: tab.id, path: iconFilename});
 
   // Only show icon for pages we can influence (http: and https:)
-  if(/^https?:/.test(tab.url))
+  var anvisoft = 'http://cloud2.anvisoft.com';
+  if(/^https?:/.test(tab.url) && tab.url.substring(0, anvisoft.length) !== anvisoft)
   {
     chrome.pageAction.setTitle({tabId: tab.id, title: "Anvisoft Adblock"});
     chrome.pageAction.show(tab.id);

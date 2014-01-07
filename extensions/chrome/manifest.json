@@ -8,7 +8,7 @@
   "permissions": [
     "tabs",
     "https://*/*",
-    "http://*//*",
+    "http://*/*",
     "webRequest",
     "webRequestBlocking",
     "webNavigation"
@@ -22,7 +22,7 @@
       "run_at": "document_start"
     },
     {
-      "matches": ["http://cloud2.anvisoft.com/interface/adblock/malware"],
+      "matches": ["http://cloud2.anvisoft.com/interface/adblock/malware?url=*"],
       "js": ["inject.js"],
       "run_at": "document_idle"
     }
