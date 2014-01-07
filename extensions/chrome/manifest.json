@@ -29,12 +29,18 @@
    ],
 
   "page_action": {
-    "default_icon": "abp-19.png",
+    "default_icon": "icons/asd-19.png",
     "default_popup": "popup.html",
     "default_title": "Anvisoft Adblock"
   },
 
   "background": {
     "page": "background.html"
-  }
+  },
+
+  "icons": {
+    "16": "icons/asd-16.png",
+    "48": "icons/asd-48.png",
+    "128": "icons/asd-128.png"
+   }
 }

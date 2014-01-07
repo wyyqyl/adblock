@@ -18,7 +18,7 @@ function refreshIcon(tab) {
     return;
 
   var excluded = API.isWhitelisted(tab.url);
-  var iconFilename = excluded ? "abp-19-whitelisted.png" : "abp-19.png";
+  var iconFilename = excluded ? "icons/asd-19-whitelisted.png" : "icons/asd-19.png";
   
   chrome.pageAction.setIcon({tabId: tab.id, path: iconFilename});
 
