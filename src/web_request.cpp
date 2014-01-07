@@ -1,5 +1,6 @@
 #include "web_request.h"
 #include <curl/curl.h>
+#include <glog/logging.h>
 #include <sstream>
 
 namespace {
@@ -16,36 +17,39 @@ struct HeaderData {
 };
 
 unsigned int ConvertErrorCode(CURLcode code) {
+  unsigned int status = adblock::WebRequest::NS_OK;
   switch (code) {
     case CURLE_OK:
       return adblock::WebRequest::NS_OK;
     case CURLE_FAILED_INIT:
-      return adblock::WebRequest::NS_ERROR_NOT_INITIALIZED;
+      status = adblock::WebRequest::NS_ERROR_NOT_INITIALIZED;
     case CURLE_UNSUPPORTED_PROTOCOL:
-      return adblock::WebRequest::NS_ERROR_UNKNOWN_PROTOCOL;
+      status = adblock::WebRequest::NS_ERROR_UNKNOWN_PROTOCOL;
     case CURLE_URL_MALFORMAT:
-      return adblock::WebRequest::NS_ERROR_MALFORMED_URI;
+      status = adblock::WebRequest::NS_ERROR_MALFORMED_URI;
     case CURLE_COULDNT_RESOLVE_PROXY:
-      return adblock::WebRequest::NS_ERROR_UNKNOWN_PROXY_HOST;
+      status = adblock::WebRequest::NS_ERROR_UNKNOWN_PROXY_HOST;
     case CURLE_COULDNT_RESOLVE_HOST:
-      return adblock::WebRequest::NS_ERROR_UNKNOWN_HOST;
+      status = adblock::WebRequest::NS_ERROR_UNKNOWN_HOST;
     case CURLE_COULDNT_CONNECT:
-      return adblock::WebRequest::NS_ERROR_CONNECTION_REFUSED;
+      status = adblock::WebRequest::NS_ERROR_CONNECTION_REFUSED;
     case CURLE_OUT_OF_MEMORY:
-      return adblock::WebRequest::NS_ERROR_OUT_OF_MEMORY;
+      status = adblock::WebRequest::NS_ERROR_OUT_OF_MEMORY;
     case CURLE_OPERATION_TIMEDOUT:
-      return adblock::WebRequest::NS_ERROR_NET_TIMEOUT;
+      status = adblock::WebRequest::NS_ERROR_NET_TIMEOUT;
     case CURLE_TOO_MANY_REDIRECTS:
-      return adblock::WebRequest::NS_ERROR_REDIRECT_LOOP;
+      status = adblock::WebRequest::NS_ERROR_REDIRECT_LOOP;
     case CURLE_GOT_NOTHING:
-      return adblock::WebRequest::NS_ERROR_NO_CONTENT;
+      status = adblock::WebRequest::NS_ERROR_NO_CONTENT;
     case CURLE_SEND_ERROR:
-      return adblock::WebRequest::NS_ERROR_NET_RESET;
+      status = adblock::WebRequest::NS_ERROR_NET_RESET;
     case CURLE_RECV_ERROR:
-      return adblock::WebRequest::NS_ERROR_NET_RESET;
+      status = adblock::WebRequest::NS_ERROR_NET_RESET;
     default:
-      return adblock::WebRequest::NS_CUSTOM_ERROR_BASE + code;
+      status = adblock::WebRequest::NS_CUSTOM_ERROR_BASE + code;
   }
+  LOG(ERROR) << "ConvertErrorCode: " << status << std::endl;
+  return status;
 }
 
 size_t ReceiveData(char* ptr, size_t size, size_t nmemb, void* userdata) {
@@ -110,6 +114,7 @@ WebRequest::ServerResponse DefaultWebRequest::Get(
 
   CURL* curl = curl_easy_init();
   if (!curl) {
+    LOG(ERROR) << "curl_easy_init failed" << std::endl;
     return result;
   }
 
