@@ -11,7 +11,6 @@ class Environment;
 
 class AdBlockImpl : public AdBlock {
  public:
-  AdBlockImpl();
   ~AdBlockImpl();
 
   bool Init();
@@ -33,13 +32,10 @@ class AdBlockImpl : public AdBlock {
 
  private:
   Environment* env_;
-  bool is_first_run_;
-  bool initialized_;
   AdblockConfig config_;
   AdblockSender sender_;
 
   std::string GetCurrentProcessName();
-  void InitDone(const JsValueList& args);
 };
 
 }  // namespace adblock
