@@ -65,3 +65,7 @@ void AdblockPluginAPI::Report(const std::string& type,
                               const std::string& url, const std::string& rule) {
   return adblock_->Report(type, documentUrl, url, rule);
 }
+
+std::uint8_t AdblockPluginAPI::GetDownloadingTask() {
+  return adblock_->GetDownloadingTask();
+}

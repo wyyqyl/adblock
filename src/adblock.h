@@ -3,6 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <string>
+#include <cstdint>
 
 namespace adblock {
 
@@ -23,6 +24,7 @@ class AdBlock {
   virtual std::string GenerateCSSContent() = 0;
   virtual void Report(const std::string& type, const std::string& documentUrl,
                       const std::string& url, const std::string& rule) = 0;
+  virtual std::uint8_t GetDownloadingTask() = 0;
 };
 
 typedef boost::shared_ptr<AdBlock> AdBlockPtr;

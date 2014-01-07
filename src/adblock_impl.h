@@ -11,6 +11,7 @@ class Environment;
 
 class AdBlockImpl : public AdBlock {
  public:
+  AdBlockImpl();
   ~AdBlockImpl();
 
   bool Init();
@@ -29,12 +30,16 @@ class AdBlockImpl : public AdBlock {
   std::string GenerateCSSContent();
   void Report(const std::string& type, const std::string& documentUrl,
               const std::string& url, const std::string& rule);
+  std::uint8_t GetDownloadingTask();
 
  private:
   Environment* env_;
   AdblockConfig config_;
   AdblockSender sender_;
+  std::uint8_t downloading_count_;
 
+  void DownloadStart(const JsValueList& args);
+  void DownloadFinished(const JsValueList& args);
   std::string GetCurrentProcessName();
 };
 

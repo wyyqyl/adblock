@@ -60,6 +60,8 @@ void CreateInstance(AdBlockPtr* adblock) {
   }
 }
 
+AdBlockImpl::AdBlockImpl() : downloading_count_(0) {}
+
 AdBlockImpl::~AdBlockImpl() {
   if (env_ != nullptr) {
     v8::Locker locker(env_->isolate());
@@ -79,6 +81,12 @@ bool AdBlockImpl::Init() {
 
     env_ = Environment::New(context);
     js_object::Setup(env_);
+
+    env_->SetEventCallback("downloadStart",
+                           boost::bind(&AdBlockImpl::DownloadStart, this, _1));
+    env_->SetEventCallback(
+        "downloadFinished",
+        boost::bind(&AdBlockImpl::DownloadFinished, this, _1));
 
 #ifdef ENABLE_DEBUGGER_SUPPORT
     debug_message_context.Reset(isolate, context);
@@ -201,6 +209,16 @@ std::string AdBlockImpl::GetCurrentProcessName() {
     return path.filename().string();
   }
   return "";
+}
+
+std::uint8_t AdBlockImpl::GetDownloadingTask() { return downloading_count_; }
+
+void AdBlockImpl::DownloadStart(const JsValueList& args) {
+  ++downloading_count_;
+}
+
+void AdBlockImpl::DownloadFinished(const JsValueList& args) {
+  --downloading_count_;
 }
 
 }  // namespace adblock

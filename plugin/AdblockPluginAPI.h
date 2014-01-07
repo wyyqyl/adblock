@@ -31,6 +31,8 @@ class AdblockPluginAPI : public FB::JSAPIAuto {
     registerMethod("dontTrackMe",
                    make_method(this, &AdblockPluginAPI::dont_track_me));
     registerMethod("report", make_method(this, &AdblockPluginAPI::Report));
+    registerMethod("getDownloadingTask",
+                   make_method(this, &AdblockPluginAPI::GetDownloadingTask));
   }
 
   virtual ~AdblockPluginAPI() {}
@@ -54,6 +56,8 @@ class AdblockPluginAPI : public FB::JSAPIAuto {
 
   void Report(const std::string& type, const std::string& documentUrl,
               const std::string& url, const std::string& filter);
+
+  std::uint8_t GetDownloadingTask();
 
  private:
   AdblockPluginWeakPtr plugin_;
