@@ -4,7 +4,7 @@ chrome.webNavigation.onCreatedNavigationTarget.addListener(onCreatedNavigationTa
 chrome.tabs.onUpdated.addListener(onUpdated);
 
 function onBeforeNavigate(details) {
-  if (details.tabId == -1) return;
+  if (details.tabId == -1 || details.frameId != 0) return;
   API.report("trace", details.url);
   if (!API.blockMalware()) return;
   var filter = API.checkFilterMatch(details.url, "DOCUMENT", details.url);
